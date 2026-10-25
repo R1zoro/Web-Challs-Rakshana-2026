@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-industrial-navy text-white py-4 border-bottom border-warning">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1">Contractor Invoices & Dispatch Logs</h2>
+            <p class="text-light opacity-75 small mb-0">Record of confirmed consignments, billing documentation, and delivery receipts.</p>
+        </div>
+        <a href="{{ url_for('order_new') }}" class="btn btn-gold btn-sm fw-bold">
+            <i class="bi bi-plus-lg me-1"></i>New Requisition RFQ
+        </a>
+    </div>
+</div>
+
+<div class="container my-5">
+    
+    <!-- Orders & Invoices Table -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-dark text-white fw-bold py-3 d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-receipt-cutoff me-1"></i> Billing Accounts for {{ session.org }}</span>
+            <span class="badge bg-secondary font-monospace">1 Active Consignment</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Order Ref</th>
+                        <th>Invoice Number</th>
+                        <th>Material Description</th>
+                        <th>Qty</th>
+                        <th>Total Amount</th>
+                        <th>Dispatch Date</th>
+                        <th>Receipt Status</th>
+                        <th class="text-end">Documentation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ord in orders %}
+                    <tr>
+                        <td class="fw-bold text-dark font-monospace">{{ ord.order_id }}</td>
+                        <td><span class="badge bg-primary font-monospace">{{ ord.invoice_id }}</span></td>
+                        <td class="fw-semibold">{{ ord.item }}</td>
+                        <td>{{ ord.quantity }}</td>
+                        <td>{{ ord.amount }}</td>
+                        <td class="small text-muted">{{ ord.date }}</td>
+                        <td>
+                            <span class="badge bg-secondary">{{ ord.status }}</span>
+                        </td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#invoiceModal">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>View Invoice
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Small Discreet Grievance Redressal Section (Below Table) -->
+    <div class="card border-0 bg-light p-3 rounded-3 shadow-sm">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <div class="small text-muted">
+                <i class="bi bi-info-circle text-secondary me-1"></i>
+                <span>Consignment non-conformance, batch surface abrasions, or billing discrepancy? Lodge a formal notice with the <strong>M-AMCEL Quality Cell</strong>.</span>
+            </div>
+            <a href="{{ url_for('grievance') }}" class="btn btn-sm btn-outline-secondary px-3 py-1 text-nowrap">
+                <i class="bi bi-arrow-right-circle me-1"></i>Grievance Redressal Desk
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<!-- Full Invoice Modal -->
+<div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white border-bottom border-warning border-2">
+                <div>
+                    <h5 class="modal-title fw-bold mb-0">TAX INVOICE — INV-2026-8812</h5>
+                    <span class="small text-gold">MAIT Advanced Materials & Core Engineering Ltd.</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3 mb-4 pb-3 border-bottom small">
+                    <div class="col-6">
+                        <strong>Billed To:</strong><br>
+                        Adit Precision Valves & Subcontracting Ltd.<br>
+                        Industrial Estate, Okhla Phase III, New Delhi<br>
+                        GSTIN: 07AAACA4491K1ZX
+                    </div>
+                    <div class="col-6 text-end">
+                        <strong>Invoice Date:</strong> 14-Oct-2026<br>
+                        <strong>PO Reference:</strong> PO-MAMCEL-2026-Q3-094<br>
+                        <strong>Payment Terms:</strong> Net 30 AERB Clearing
+                    </div>
+                </div>
+
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Item Description</th>
+                                <th>Standard Specification</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Unit Price</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Class-A Zirconium Alloy Cladding Seals</td>
+                                <td class="small text-muted">ASTM B811 / Reactor Grade Zircaloy-4 (OD 9.5mm)</td>
+                                <td class="text-center font-monospace">24</td>
+                                <td class="text-end">₹ 20,083.33</td>
+                                <td class="text-end font-monospace">₹ 4,82,000.00</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="4" class="text-end">Subtotal:</th>
+                                <td class="text-end font-monospace">₹ 4,82,000.00</td>
+                            </tr>
+                            <tr>
+                                <th colspan="4" class="text-end">CGST + SGST (18%):</th>
+                                <td class="text-end font-monospace">₹ 86,760.00</td>
+                            </tr>
+                            <tr class="table-light">
+                                <th colspan="4" class="text-end fs-6">Total Payable:</th>
+                                <td class="text-end fw-bold fs-6 font-monospace">₹ 5,68,760.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="p-3 bg-light rounded border small text-muted">
+                    <strong>Delivery Acknowledgment:</strong> Consignment accepted under conditional delivery note #DN-8812. 
+                    Surface scratch inspection noted by QA inspector Vikram Adit.
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

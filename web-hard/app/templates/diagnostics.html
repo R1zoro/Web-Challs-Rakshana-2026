@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+        <div>
+            <h5 class="fw-bold text-white mb-0">
+                <i class="bi bi-terminal-split text-cyan me-2"></i>Field C&I Diagnostic Gateway & Substation Protocol Dispatcher
+            </h5>
+            <span class="small text-light font-monospace">AERB-OT Diagnostic Probe Tool &bull; Inspect Field RTU Communication & Internal Controller Relays</span>
+        </div>
+        <span class="badge bg-dark border border-warning text-warning font-monospace py-2 px-3 fs-6">
+            <i class="bi bi-tools me-1"></i> C&I DIAGNOSTIC CONSOLE
+        </span>
+    </div>
+
+    <!-- Quick Target Node Selector Bar -->
+    <div class="scada-card p-3 mb-4">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <span class="small text-light fw-bold me-2"><i class="bi bi-hdd-network text-cyan me-1"></i>Target Node Presets:</span>
+            <button type="button" class="btn btn-sm btn-scada-secondary" id="presetInternalController">
+                <i class="bi bi-shield-lock text-warning me-1"></i>Internal SIS Controller (127.0.0.2:9090)
+            </button>
+            <button type="button" class="btn btn-sm btn-scada-secondary" id="presetFirmwareVerify">
+                <i class="bi bi-cpu text-cyan me-1"></i>Firmware Verification Routine
+            </button>
+            <button type="button" class="btn btn-sm btn-scada-secondary" id="presetGateway">
+                <i class="bi bi-hdd-network text-primary me-1"></i>SCADA Gateway (10.0.5.42:5000)
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Diagnostic Probe Configuration Panel -->
+        <div class="col-lg-6">
+            <div class="scada-card p-4 h-100 d-flex flex-column">
+                <div class="scada-card-header mb-3 text-cyan">
+                    <i class="bi bi-send-fill me-2"></i> Subsystem Diagnostic Dispatcher
+                </div>
+
+                <p class="small text-light mb-3">
+                    Transmit low-level diagnostic telemetry queries to field RTU gateways or internal controller supervisory endpoints. 
+                    Used by Control & Instrumentation engineers to clear latched safety trips and test controller firmware routines.
+                </p>
+
+                <form id="probeForm" class="flex-grow-1 d-flex flex-column">
+                    <!-- Diagnostic Routine Selector -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-white mb-1">Diagnostic Function / Routine</label>
+                        <select id="routineSelect" class="form-select bg-dark border-secondary text-white font-monospace">
+                            <option value="firmware_verify" selected>Firmware Parity & CRC Verification (/api/controller/firmware-verify)</option>
+                            <option value="sis_status">Hardware Watchdog & Trip Relays (/api/controller/status)</option>
+                            <option value="sis_root">Controller Root Specification (/)</option>
+                            <option value="scada_overview">SCADA Gateway Overview (/api/v1/scada/overview)</option>
+                            <option value="custom">Custom Protocol Endpoint URL</option>
+                        </select>
+                    </div>
+
+                    <!-- Target Host / Base URL -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-white mb-1">Target Controller Endpoint Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-cyan font-monospace small fw-bold">HOST</span>
+                            <input type="text" id="probeHost" class="form-control bg-dark border-secondary text-white font-monospace" value="127.0.0.2:9090" required>
+                        </div>
+                        <div class="small text-light mt-1">
+                            <i class="bi bi-info-circle text-cyan me-1"></i> Enter target IP/hostname and port (e.g. internal SIS controller on loopback port 9090).
+                        </div>
+                    </div>
+
+                    <!-- Routine Parameters (Routine Name & Checksum) -->
+                    <div id="routineParamsSection" class="p-3 bg-dark rounded border border-secondary mb-3">
+                        <span class="small text-warning fw-bold d-block mb-2"><i class="bi bi-sliders me-1"></i>Firmware Verification Routine Parameters:</span>
+                        <div class="row g-2">
+                            <div class="col-sm-7">
+                                <label class="form-label small text-light mb-1">Routine Identifier</label>
+                                <input type="text" id="paramRoutine" class="form-control bg-dark border-secondary text-white font-monospace small" value="decay_heat_recovery" placeholder="e.g. decay_heat_recovery">
+                            </div>
+                            <div class="col-sm-5">
+                                <label class="form-label small text-light mb-1">CRC Checksum</label>
+                                <input type="text" id="paramChecksum" class="form-control bg-dark border-secondary text-white font-monospace small" value="0x8FA4" placeholder="e.g. 0x8FA4">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Dispatch URL Preview -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-white mb-1">Dispatched Request String</label>
+                        <div class="p-2 bg-dark rounded border border-secondary font-monospace small text-cyan user-select-all" id="dispatchPreview">
+                            http://127.0.0.2:9090/api/controller/firmware-verify?routine=decay_heat_recovery&checksum=0x8FA4
+                        </div>
+                    </div>
+
+                    <!-- Collapsible Advanced Options -->
+                    <div class="accordion mb-3" id="advancedAccordion">
+                        <div class="accordion-item bg-dark border-secondary">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-dark text-light font-monospace small py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdvanced">
+                                    <i class="bi bi-gear-fill text-cyan me-2"></i>Advanced Network & Protocol Flags
+                                </button>
+                            </h2>
+                            <div id="collapseAdvanced" class="accordion-collapse collapse" data-bs-parent="#advancedAccordion">
+                                <div class="accordion-body bg-dark text-light p-3">
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-sm-6">
+                                            <label class="form-label small text-light mb-1">HTTP Method</label>
+                                            <select id="probeMethod" class="form-select bg-dark border-secondary text-white font-monospace small">
+                                                <option value="GET" selected>GET (Read Telemetry)</option>
+                                                <option value="POST">POST (Execute Command)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label class="form-label small text-light mb-1">Timeout (Sec)</label>
+                                            <input type="number" id="probeTimeout" class="form-control bg-dark border-secondary text-white font-monospace small" value="5" min="1" max="15">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="form-label small text-light mb-1">Custom Payload Body (Optional)</label>
+                                        <textarea id="probePayload" class="form-control bg-dark border-secondary text-white font-monospace small" rows="2" placeholder='{"routine": "decay_heat_recovery", "checksum": "0x8FA4"}'></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-2 bg-dark rounded border border-secondary mb-3 small text-light">
+                        <strong class="text-warning d-block mb-1"><i class="bi bi-shield-lock-fill me-1"></i>AERB Security Notice:</strong>
+                        Direct probing of <code>localhost</code> / <code>127.0.0.1</code> addresses is blocked by security policy AERB-OT-SEC-901. Field node or alternate address dispatch is permitted.
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <button type="button" class="btn btn-sm btn-scada-secondary" id="clearFormBtn">
+                            <i class="bi bi-x-circle me-1"></i>Reset Defaults
+                        </button>
+                        <button type="submit" class="btn btn-scada-primary px-4 fw-bold">
+                            <i class="bi bi-play-circle-fill me-1"></i>Execute Diagnostic Routine
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Diagnostic Response Terminal Output Panel -->
+        <div class="col-lg-6">
+            <div class="scada-card p-4 h-100 d-flex flex-column">
+                <div class="scada-card-header d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-warning"><i class="bi bi-terminal-fill me-2"></i> Diagnostic Protocol Terminal Output</span>
+                    <span class="badge bg-dark border text-light font-monospace" id="probeStatusBadge">IDLE</span>
+                </div>
+
+                <div class="p-3 bg-dark rounded border border-secondary flex-grow-1 font-monospace small d-flex flex-column" style="min-height: 400px;">
+                    <div class="text-light border-bottom border-secondary pb-2 mb-2 d-flex justify-content-between">
+                        <span>STATUS: <strong class="text-white" id="outStatus">WAITING FOR PROBE</strong></span>
+                        <span id="outRtt" class="text-warning">RTT: -- ms</span>
+                    </div>
+
+                    <div class="flex-grow-1 overflow-auto p-2" id="probeTerminal" style="max-height: 420px; color: #38bdf8; white-space: pre-wrap; word-break: break-all;">
+[ KAVACH SCADA Telemetry Diagnostic Terminal v4.8 ]
+Ready for diagnostic probe transmission.
+Select a diagnostic routine and click "Execute Diagnostic Routine".
+                    </div>
+                </div>
+
+                <div class="p-2 px-3 bg-dark rounded border border-secondary mt-3 small text-light font-monospace">
+                    <i class="bi bi-cpu text-cyan me-1"></i> Gateway Probe Engine: <span class="text-white">urllib.request/3.14-KAVACH</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const routineSelect = document.getElementById("routineSelect");
+    const hostInput = document.getElementById("probeHost");
+    const routineInput = document.getElementById("paramRoutine");
+    const checksumInput = document.getElementById("paramChecksum");
+    const routineParamsSection = document.getElementById("routineParamsSection");
+    const dispatchPreview = document.getElementById("dispatchPreview");
+    const methodSelect = document.getElementById("probeMethod");
+    const timeoutInput = document.getElementById("probeTimeout");
+    const payloadInput = document.getElementById("probePayload");
+
+    const form = document.getElementById("probeForm");
+    const terminal = document.getElementById("probeTerminal");
+    const statusBadge = document.getElementById("probeStatusBadge");
+    const outStatus = document.getElementById("outStatus");
+    const outRtt = document.getElementById("outRtt");
+
+    function updatePreview() {
+        let host = hostInput.value.trim();
+        if (!host.startsWith('http://') && !host.startsWith('https://')) {
+            host = 'http://' + host;
+        }
+        // Remove trailing slash
+        if (host.endsWith('/')) {
+            host = host.slice(0, -1);
+        }
+
+        const routineType = routineSelect.value;
+        let url = '';
+
+        if (routineType === 'firmware_verify') {
+            routineParamsSection.style.display = 'block';
+            const r = encodeURIComponent(routineInput.value.trim());
+            const c = encodeURIComponent(checksumInput.value.trim());
+            url = `${host}/api/controller/firmware-verify?routine=${routineInput.value.trim()}&checksum=${checksumInput.value.trim()}`;
+        } else if (routineType === 'sis_status') {
+            routineParamsSection.style.display = 'none';
+            url = `${host}/api/controller/status`;
+        } else if (routineType === 'sis_root') {
+            routineParamsSection.style.display = 'none';
+            url = `${host}/`;
+        } else if (routineType === 'scada_overview') {
+            routineParamsSection.style.display = 'none';
+            url = `${host}/api/v1/scada/overview`;
+        } else {
+            routineParamsSection.style.display = 'none';
+            url = host;
+        }
+
+        dispatchPreview.innerText = url;
+        return url;
+    }
+
+    routineSelect.addEventListener('change', updatePreview);
+    hostInput.addEventListener('input', updatePreview);
+    routineInput.addEventListener('input', updatePreview);
+    checksumInput.addEventListener('input', updatePreview);
+
+    // Presets
+    document.getElementById("presetInternalController").addEventListener("click", function () {
+        hostInput.value = "127.0.0.2:9090";
+        routineSelect.value = "sis_root";
+        updatePreview();
+    });
+
+    document.getElementById("presetFirmwareVerify").addEventListener("click", function () {
+        hostInput.value = "127.0.0.2:9090";
+        routineSelect.value = "firmware_verify";
+        routineInput.value = "decay_heat_recovery";
+        checksumInput.value = "0x8FA4";
+        updatePreview();
+    });
+
+    document.getElementById("presetGateway").addEventListener("click", function () {
+        hostInput.value = "10.0.5.42:5000";
+        routineSelect.value = "scada_overview";
+        updatePreview();
+    });
+
+    document.getElementById("clearFormBtn").addEventListener("click", function () {
+        hostInput.value = "127.0.0.2:9090";
+        routineSelect.value = "firmware_verify";
+        routineInput.value = "decay_heat_recovery";
+        checksumInput.value = "0x8FA4";
+        payloadInput.value = "";
+        updatePreview();
+    });
+
+    // Initial calculation
+    updatePreview();
+
+    // Form Submission
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const url = updatePreview();
+        const method = methodSelect.value;
+        const timeout = parseInt(timeoutInput.value) || 5;
+        let payload = payloadInput.value.trim();
+
+        if (payload) {
+            try {
+                payload = JSON.parse(payload);
+            } catch (err) {}
+        }
+
+        statusBadge.className = "badge bg-warning text-dark font-monospace";
+        statusBadge.innerText = "TRANSMITTING...";
+        outStatus.innerText = "DISPATCHING PROTOCOL PACKET...";
+        outRtt.innerText = "RTT: ...";
+        terminal.innerHTML = `<span class="text-light">[*] Dispatching ${method} probe to: ${url}...\n[*] Waiting for controller bus reply...</span>`;
+
+        const startTime = Date.now();
+
+        try {
+            const res = await fetch('/api/v1/scada/diagnostics/probe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    target_url: url,
+                    method: method,
+                    timeout: timeout,
+                    payload: payload
+                })
+            });
+
+            const rtt = Date.now() - startTime;
+            outRtt.innerText = `RTT: ${rtt} ms`;
+
+            const data = await res.json();
+
+            if (res.ok && data.status === 'success') {
+                statusBadge.className = "badge bg-success font-monospace";
+                statusBadge.innerText = `HTTP ${data.http_status} OK`;
+                outStatus.innerText = `HTTP ${data.http_status} (SUCCESS)`;
+
+                let formatted = data.response;
+                try {
+                    const parsed = JSON.parse(data.response);
+                    formatted = JSON.stringify(parsed, null, 2);
+                } catch (e) {}
+
+                terminal.innerHTML = `<span class="text-success fw-bold">[+] Diagnostic Probe Succeeded!</span>\n\n` +
+                    `<span class="text-light">Target Node:</span> <span class="text-white font-monospace">${data.probe_target}</span>\n` +
+                    `<span class="text-light">Response Code:</span> <span class="text-warning font-monospace">${data.http_status}</span>\n\n` +
+                    `<span class="text-cyan">${formatted}</span>`;
+            } else if (data.status === 'security_violation') {
+                statusBadge.className = "badge bg-danger font-monospace";
+                statusBadge.innerText = "SECURITY FILTER TRIGGERED";
+                outStatus.innerText = "HTTP 403 BLOCKED";
+                terminal.innerHTML = `<span class="text-danger fw-bold">[!] SECURITY FILTER TRIGGERED [${data.code}]:</span>\n\n` +
+                    `<span class="text-warning">${data.message}</span>`;
+            } else {
+                statusBadge.className = "badge bg-danger font-monospace";
+                statusBadge.innerText = "PROBE ERROR";
+                outStatus.innerText = `HTTP ${res.status} FAILED`;
+                terminal.innerHTML = `<span class="text-danger fw-bold">[-] Probe Execution Failed:</span>\n\n` +
+                    `<span class="text-warning">${data.message || data.response || JSON.stringify(data)}</span>`;
+            }
+        } catch (err) {
+            statusBadge.className = "badge bg-danger font-monospace";
+            statusBadge.innerText = "NETWORK ERROR";
+            outStatus.innerText = "FAILED";
+            terminal.innerHTML = `<span class="text-danger">[-] Gateway network error: ${err.message}</span>`;
+        }
+    });
+});
+</script>
+{% endblock %}

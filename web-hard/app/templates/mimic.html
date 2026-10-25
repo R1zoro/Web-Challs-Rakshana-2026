@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+        <div>
+            <h5 class="fw-bold text-white mb-0">
+                <i class="bi bi-diagram-3-fill text-cyan me-2"></i>Primary Heat Transport (PHT) & Decay Heat Process Mimic (P&ID)
+            </h5>
+            <span class="small text-light font-monospace">P&ID SCHEMATIC: MAIT-NRF-PHT-DWG-004 Rev 12 &bull; Select any equipment tag or valve to inspect telemetry</span>
+        </div>
+        <span class="badge bg-danger font-monospace py-2 px-3 fs-6">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> CV-201 ACTUATOR JAMMED
+        </span>
+    </div>
+
+    <!-- Quick Equipment Selector Bar (Clickable Pills) -->
+    <div class="scada-card p-3 mb-3">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <span class="small text-light fw-bold me-2"><i class="bi bi-hand-index-thumb text-cyan me-1"></i>Select Plant Component:</span>
+            <button type="button" class="equipment-pill active" data-kks="20LCA10AA001">
+                <i class="bi bi-exclamation-circle text-danger me-1"></i>CV-201 (Jammed Valve)
+            </button>
+            <button type="button" class="equipment-pill" data-kks="10LBA10CT001">
+                <i class="bi bi-thermometer-high text-warning me-1"></i>CT001 (Core Outlet Temp)
+            </button>
+            <button type="button" class="equipment-pill" data-kks="10LBA10CP002">
+                <i class="bi bi-speedometer text-cyan me-1"></i>CP002 (PHT Pressure)
+            </button>
+            <button type="button" class="equipment-pill" data-kks="10LBA20AP001">
+                <i class="bi bi-fan text-success me-1"></i>PHT-01 (Circulation Pump)
+            </button>
+            <button type="button" class="equipment-pill" data-kks="10LBA20AP002">
+                <i class="bi bi-fan text-success me-1"></i>PHT-02 (Auxiliary Pump)
+            </button>
+            <button type="button" class="equipment-pill" data-kks="70ECMT10CF001">
+                <i class="bi bi-droplet-fill text-info me-1"></i>ECMT-01 (Makeup Tank)
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Interactive Mimic Graphic -->
+        <div class="col-xl-8">
+            <div class="scada-card p-3">
+                <div class="bg-dark rounded p-3 text-center position-relative" style="min-height: 480px; overflow-x: auto;">
+                    
+                    <!-- SVG Schematic with clear clickable regions -->
+                    <svg viewBox="0 0 900 460" class="w-100 h-auto" style="min-width: 700px;" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Pipe Background Shadows -->
+                        <path d="M 120 220 L 280 220 L 280 120 L 520 120 L 520 220 L 760 220 L 760 360 L 120 360 Z" fill="none" stroke="#1e293b" stroke-width="12" stroke-linejoin="round"/>
+                        
+                        <!-- Primary Heavy Water Loop (Hot Leg) -->
+                        <path d="M 200 220 L 280 220 L 280 120 L 520 120" fill="none" stroke="#ef4444" stroke-width="6" stroke-dasharray="10 5"/>
+                        
+                        <!-- Cold Leg Return Pipe -->
+                        <path d="M 520 220 L 760 220 L 760 360 L 120 360 L 120 220 L 160 220" fill="none" stroke="#06b6d4" stroke-width="6"/>
+
+                        <!-- Decay Heat Emergency Branch -->
+                        <path d="M 280 120 L 280 50 L 640 50 L 640 120" fill="none" stroke="#f59e0b" stroke-width="4" stroke-dasharray="6 4"/>
+
+                        <!-- Reactor Core Vessel -->
+                        <g class="interactive-tag" data-kks="10LBA10CT001" style="cursor: pointer;">
+                            <rect x="100" y="160" width="100" height="140" rx="8" fill="#111927" stroke="#3b82f6" stroke-width="3"/>
+                            <text x="150" y="195" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">REACTOR CORE</text>
+                            <text x="150" y="215" fill="#ef4444" font-size="12" font-family="monospace" text-anchor="middle">345.2 °C</text>
+                            <text x="150" y="235" fill="#10b981" font-size="11" font-family="monospace" text-anchor="middle">RODS DOWN</text>
+                        </g>
+                        
+                        <!-- Hot Leg Temp Sensor Tag -->
+                        <g class="interactive-tag" data-kks="10LBA10CT001" style="cursor: pointer;">
+                            <circle cx="240" cy="120" r="22" fill="#1e293b" stroke="#ef4444" stroke-width="3"/>
+                            <text x="240" y="125" fill="#ffffff" font-size="10" font-weight="bold" font-family="monospace" text-anchor="middle">CT001</text>
+                        </g>
+
+                        <!-- PHT Header Pressure Sensor Tag -->
+                        <g class="interactive-tag" data-kks="10LBA10CP002" style="cursor: pointer;">
+                            <circle cx="340" cy="120" r="22" fill="#1e293b" stroke="#f59e0b" stroke-width="3"/>
+                            <text x="340" y="125" fill="#ffffff" font-size="10" font-weight="bold" font-family="monospace" text-anchor="middle">CP002</text>
+                        </g>
+
+                        <!-- Secondary Heat Exchanger HX-01 -->
+                        <g class="interactive-tag" data-kks="20LCA10AA001" style="cursor: pointer;">
+                            <rect x="460" y="90" width="120" height="180" rx="10" fill="#111927" stroke="#06b6d4" stroke-width="3"/>
+                            <text x="520" y="150" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">HEAT EXCHANGER</text>
+                            <text x="520" y="170" fill="#93c5fd" font-size="11" text-anchor="middle">HX-01 (TITANIUM)</text>
+                            <text x="520" y="190" fill="#06b6d4" font-size="11" font-family="monospace" text-anchor="middle">SECONDARY DUMP</text>
+                        </g>
+
+                        <!-- Emergency Decay Heat Valve CV-201 (LOCKED!) -->
+                        <g class="interactive-tag" data-kks="20LCA10AA001" style="cursor: pointer;">
+                            <circle cx="470" cy="50" r="30" fill="rgba(239, 68, 68, 0.2)" stroke="#ef4444" stroke-width="2"/>
+                            <polygon points="440,35 470,50 440,65" fill="#ef4444"/>
+                            <polygon points="500,35 470,50 500,65" fill="#ef4444"/>
+                            <circle cx="470" cy="50" r="7" fill="#ffffff"/>
+                            <text x="470" y="18" fill="#ef4444" font-size="12" font-weight="bold" text-anchor="middle">CV-201 (LOCKED)</text>
+                        </g>
+
+                        <!-- Primary Circulation Pump PHT-01 -->
+                        <g class="interactive-tag" data-kks="10LBA20AP001" style="cursor: pointer;">
+                            <circle cx="360" cy="360" r="32" fill="#111927" stroke="#10b981" stroke-width="3"/>
+                            <text x="360" y="356" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">PHT-01</text>
+                            <text x="360" y="372" fill="#10b981" font-size="10" font-family="monospace" text-anchor="middle">2.85 mm/s</text>
+                        </g>
+
+                        <!-- Primary Circulation Pump PHT-02 -->
+                        <g class="interactive-tag" data-kks="10LBA20AP002" style="cursor: pointer;">
+                            <circle cx="520" cy="360" r="32" fill="#111927" stroke="#10b981" stroke-width="3"/>
+                            <text x="520" y="356" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">PHT-02</text>
+                            <text x="520" y="372" fill="#10b981" font-size="10" font-family="monospace" text-anchor="middle">1.94 mm/s</text>
+                        </g>
+
+                        <!-- Emergency Core Makeup Tank (ECMT) -->
+                        <g class="interactive-tag" data-kks="70ECMT10CF001" style="cursor: pointer;">
+                            <rect x="700" y="60" width="110" height="90" rx="6" fill="#111927" stroke="#a855f7" stroke-width="2"/>
+                            <text x="755" y="95" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">ECMT TANK</text>
+                            <text x="755" y="115" fill="#a855f7" font-size="10" font-family="monospace" text-anchor="middle">60,000L PASSIVE</text>
+                        </g>
+                    </svg>
+
+                    <div class="mt-3 p-2 bg-dark rounded border border-secondary text-light small font-monospace">
+                        <i class="bi bi-info-circle text-cyan me-1"></i> Interactive P&ID: Click on any component or use the quick buttons above to query live instrumentation telemetry.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Telemetry Inspection Sidebar (High Contrast) -->
+        <div class="col-xl-4">
+            <div class="scada-card h-100 p-3" id="telemetryDetailPanel">
+                <div class="scada-card-header mb-3 text-cyan">
+                    <i class="bi bi-card-checklist me-2"></i> Selected Loop Inspector
+                </div>
+                <div id="inspectorContent">
+                    <div class="p-3 bg-dark rounded border border-secondary mb-3">
+                        <span class="badge bg-primary mb-2 font-monospace">INITIAL SELECTION</span>
+                        <h6 class="text-white fw-bold mb-1">Loading default telemetry...</h6>
+                        <span class="small text-light">Querying component database...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const pills = document.querySelectorAll(".equipment-pill");
+    const svgTags = document.querySelectorAll(".interactive-tag");
+    const panel = document.getElementById("inspectorContent");
+
+    async function inspectKKS(kks) {
+        panel.innerHTML = `
+            <div class="text-center py-4">
+                <span class="spinner-border spinner-border-sm text-cyan mb-2" role="status"></span>
+                <div class="small text-light font-monospace">Querying telemetry for ${kks}...</div>
+            </div>
+        `;
+
+        // Update active state on pills
+        pills.forEach(p => {
+            if (p.getAttribute("data-kks") === kks) {
+                p.classList.add("active");
+            } else {
+                p.classList.remove("active");
+            }
+        });
+
+        try {
+            const res = await fetch(`/api/v1/scada/telemetry/tag/${encodeURIComponent(kks)}`);
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                const inst = data.instrument;
+                panel.innerHTML = `
+                    <div class="p-3 bg-dark rounded border border-secondary mb-3">
+                        <span class="badge bg-primary font-monospace">${inst.loop_id}</span>
+                        <h5 class="fw-bold text-white mt-1 mb-0">${inst.kks_tag}</h5>
+                        <div class="small text-cyan font-monospace fw-semibold mt-1">${inst.service_description}</div>
+                    </div>
+
+                    <div class="p-3 bg-dark rounded border border-secondary mb-3 small">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-light">Substation Sector:</span>
+                            <strong class="text-white">${inst.substation_sector}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-light">Manufacturer:</span>
+                            <span class="text-white fw-semibold">${inst.manufacturer}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-light">Transmitter Model:</span>
+                            <span class="text-white">${inst.model_number}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-light">Serial Number:</span>
+                            <span class="font-monospace text-warning fw-bold">${inst.serial_number}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-light">Current Signal:</span>
+                            <span class="badge bg-info text-dark font-monospace fw-bold fs-6">${inst.current_milliamp} mA</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-light">Calibrated Range:</span>
+                            <span class="text-white font-monospace">${inst.calibrated_range_low} - ${inst.calibrated_range_high} ${inst.unit}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-light">Calibration Tolerance:</span>
+                            <span class="text-success font-monospace fw-bold">±${inst.tolerance_percent}%</span>
+                        </div>
+                    </div>
+
+                    <h6 class="small fw-bold text-light text-uppercase mb-2"><i class="bi bi-graph-up text-cyan me-1"></i>24-Hour Telemetry History:</h6>
+                    <div class="p-2 bg-dark rounded border border-secondary font-monospace small" style="max-height: 180px; overflow-y: auto;">
+                        ${data.history.map(h => `
+                            <div class="d-flex justify-content-between py-1 border-bottom border-secondary text-light" style="font-size: 0.8rem;">
+                                <span>${h.timestamp.split(' ')[1]}</span>
+                                <strong class="text-cyan">${h.val} ${h.unit}</strong>
+                                <span class="text-warning">${h.variance_percent}%</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                panel.innerHTML = `<div class="alert alert-warning small">${data.message}</div>`;
+            }
+        } catch (err) {
+            panel.innerHTML = `<div class="alert alert-danger small">Network error fetching telemetry: ${err.message}</div>`;
+        }
+    }
+
+    // Attach click listeners to pills
+    pills.forEach(p => {
+        p.addEventListener("click", function () {
+            const kks = this.getAttribute("data-kks");
+            inspectKKS(kks);
+        });
+    });
+
+    // Attach click listeners to SVG elements
+    svgTags.forEach(t => {
+        t.addEventListener("click", function () {
+            const kks = this.getAttribute("data-kks");
+            inspectKKS(kks);
+        });
+    });
+
+    // Initial load for CV-201
+    inspectKKS("20LCA10AA001");
+});
+</script>
+{% endblock %}

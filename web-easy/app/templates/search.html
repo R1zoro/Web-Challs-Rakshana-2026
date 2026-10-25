@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Universal Search Banner -->
+<div class="bg-dark text-white py-4 border-bottom border-warning border-3">
+    <div class="container">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-secondary rounded-pill text-warning small fw-bold mb-2">
+            <span class="badge bg-warning text-dark">UNIVERSAL DISCOVERY</span>
+            <span>M-AMCEL CLEARINGHOUSE REPOSITORY</span>
+        </div>
+        <h2 class="fw-bold text-white mb-1">
+            <i class="bi bi-search text-warning me-2"></i>Public Knowledge & Procurement Search
+        </h2>
+        <p class="text-light opacity-75 mb-0 small">
+            Universal search query across active tenders, AERB compliance circulars, nuclear-grade materials, and empanelled industrial vendors.
+        </p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Big Search Input -->
+    <div class="card bg-white shadow-sm border-0 mb-4 p-4">
+        <div class="input-group input-group-lg">
+            <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" id="universalInput" class="form-control" placeholder="Search across all tenders, circulars, materials, or vendors..." value="{{ q }}">
+            <button class="btn btn-warning fw-bold px-4" id="searchSubmitBtn">Search Portal</button>
+        </div>
+    </div>
+
+    <!-- Results Status Badge -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-dark mb-0" id="resultsTitle">Search Results</h5>
+        <span class="badge bg-dark font-monospace" id="resultsBadge">Type query to search...</span>
+    </div>
+
+    <!-- Results Containers -->
+    <div id="resultsContainer">
+        <!-- Rendered dynamically by JavaScript via /api/v1/search -->
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("universalInput");
+    const submitBtn = document.getElementById("searchSubmitBtn");
+    const container = document.getElementById("resultsContainer");
+    const badge = document.getElementById("resultsBadge");
+    const title = document.getElementById("resultsTitle");
+
+    async function executeSearch() {
+        const q = input.value.trim();
+        if (!q) {
+            container.innerHTML = '<div class="alert alert-info">Please enter a keyword, material code, or tender reference to search.</div>';
+            badge.innerText = '0 Results';
+            return;
+        }
+
+        container.innerHTML = '<div class="text-center py-5"><span class="spinner-border spinner-border-sm me-2"></span>Searching repository database...</div>';
+
+        try {
+            const res = await fetch(`/api/v1/search?q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+
+            if (data.status === "success") {
+                const total = data.total_matches;
+                badge.innerText = `${total} Total Matches`;
+                title.innerText = `Search Results for "${data.query}"`;
+
+                if (total === 0) {
+                    container.innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-circle me-2"></i>No records found matching your search term. Try keywords like "Zirconium", "Boron", "Valve", "AERB", "Tender", or "Heavy Water".</div>';
+                    return;
+                }
+
+                let html = '';
+
+                // 1. Tenders
+                if (data.results.tenders && data.results.tenders.length > 0) {
+                    html += `<div class="card mb-4 shadow-sm border-0">
+                        <div class="card-header bg-industrial-navy text-white fw-bold">
+                            <i class="bi bi-file-earmark-ruled me-2"></i>Matching Tenders & RFQs (${data.results.tenders.length})
+                        </div>
+                        <div class="list-group list-group-flush">`;
+                    data.results.tenders.forEach(t => {
+                        html += `<div class="list-group-item p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="badge bg-primary font-monospace">${t.tender_no}</span>
+                                <span class="badge bg-light text-dark border">${t.division}</span>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">${t.title}</h6>
+                            <p class="small text-muted mb-2">${t.specifications}</p>
+                            <div class="small font-monospace text-secondary">
+                                <strong>Est. Value:</strong> ${t.est_value} &bull; <strong>Closing:</strong> ${t.closing_date} &bull; <strong>Status:</strong> ${t.status}
+                            </div>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+
+                // 2. Circulars
+                if (data.results.circulars && data.results.circulars.length > 0) {
+                    html += `<div class="card mb-4 shadow-sm border-0">
+                        <div class="card-header bg-dark text-white fw-bold">
+                            <i class="bi bi-journal-text text-warning me-2"></i>Matching AERB / NPCIL Circulars (${data.results.circulars.length})
+                        </div>
+                        <div class="list-group list-group-flush">`;
+                    data.results.circulars.forEach(c => {
+                        html += `<div class="list-group-item p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="badge bg-dark font-monospace">${c.ref}</span>
+                                <span class="small text-muted font-monospace">${c.date}</span>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">${c.title}</h6>
+                            <p class="small text-muted mb-0">${c.summary}</p>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+
+                // 3. Materials
+                if (data.results.materials && data.results.materials.length > 0) {
+                    html += `<div class="card mb-4 shadow-sm border-0">
+                        <div class="card-header bg-secondary text-white fw-bold">
+                            <i class="bi bi-box-seam me-2"></i>Matching Core Materials (${data.results.materials.length})
+                        </div>
+                        <div class="list-group list-group-flush">`;
+                    data.results.materials.forEach(m => {
+                        html += `<div class="list-group-item p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="badge bg-dark font-monospace">${m.id}</span>
+                                <span class="badge bg-success-subtle text-success">${m.category}</span>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">${m.name}</h6>
+                            <p class="small text-muted mb-1">${m.desc}</p>
+                            <div class="small text-secondary"><strong>Assay Purity:</strong> ${m.purity} &bull; <strong>Compliance:</strong> ${m.compliance}</div>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+
+                // 4. Vendors
+                if (data.results.vendors && data.results.vendors.length > 0) {
+                    html += `<div class="card mb-4 shadow-sm border-0">
+                        <div class="card-header bg-light text-dark fw-bold border-bottom">
+                            <i class="bi bi-buildings text-primary me-2"></i>Matching Empanelled Vendors (${data.results.vendors.length})
+                        </div>
+                        <div class="list-group list-group-flush">`;
+                    data.results.vendors.forEach(v => {
+                        html += `<div class="list-group-item p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="badge bg-light text-dark border font-monospace">${v.vendor_id}</span>
+                                <span class="badge bg-success-subtle text-success">${v.empanelment_category}</span>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">${v.company_name}</h6>
+                            <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i>${v.location} &bull; <strong>AERB Seal:</strong> ${v.aerb_clearance}</div>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+
+                container.innerHTML = html;
+            }
+        } catch (err) {
+            container.innerHTML = `<div class="alert alert-danger">Error querying search database: ${err.message}</div>`;
+        }
+    }
+
+    submitBtn.addEventListener("click", executeSearch);
+    input.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            executeSearch();
+        }
+    });
+
+    if (input.value.trim()) {
+        executeSearch();
+    }
+});
+</script>
+
+{% endblock %}

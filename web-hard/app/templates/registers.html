@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+        <div>
+            <h5 class="fw-bold text-white mb-0">
+                <i class="bi bi-cpu-fill text-info me-2"></i>PLC Holding & Coil Register Memory Explorer (Modbus / DNP3)
+            </h5>
+            <span class="small text-muted font-monospace">Direct Memory Map: Holding Registers 40001 - 40250 &bull; 16-Bit Word Addressing</span>
+        </div>
+        <span class="badge bg-secondary font-monospace py-2 px-3" id="totalRegistersBadge">
+            TOTAL REGISTERS: 250
+        </span>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="scada-card p-3 mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-5">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="regSearchInput" class="form-control bg-dark border-secondary text-white" placeholder="Search by register address (e.g. 40012), KKS tag, or description...">
+                </div>
+            </div>
+            <div class="col-lg-7 d-flex flex-wrap gap-2 justify-content-lg-end">
+                <span class="small text-muted fw-bold me-1 align-self-center">Memory Block:</span>
+                <select id="regBlockSelect" class="form-select form-select-sm bg-dark border-secondary text-white" style="max-width: 200px;">
+                    <option value="ALL" selected>All Blocks (40001 - 40250)</option>
+                    <option value="BLOCK_1">Block 1 (40001 - 40025)</option>
+                    <option value="BLOCK_2">Block 2 (40026 - 40050)</option>
+                    <option value="BLOCK_3">Block 3 (40051 - 40075)</option>
+                    <option value="BLOCK_4">Block 4 (40076 - 40100)</option>
+                    <option value="BLOCK_5">Block 5 (40101 - 40125)</option>
+                    <option value="BLOCK_6">Block 6 (40126 - 40150)</option>
+                    <option value="BLOCK_7">Block 7 (40151 - 40175)</option>
+                    <option value="BLOCK_8">Block 8 (40176 - 40200)</option>
+                    <option value="BLOCK_9">Block 9 (40201 - 40225)</option>
+                    <option value="BLOCK_10">Block 10 (40226 - 40250)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registers Table -->
+    <div class="scada-card mb-4">
+        <div class="table-responsive">
+            <table class="table scada-table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 110px;">Address</th>
+                        <th style="width: 100px;">Block</th>
+                        <th style="width: 140px;">KKS Tag</th>
+                        <th>Descriptor</th>
+                        <th>Raw Hex</th>
+                        <th>16-Bit Word (Binary)</th>
+                        <th>Scaled Val</th>
+                        <th>Access</th>
+                        <th class="text-end" style="width: 100px;">Inspect</th>
+                    </tr>
+                </thead>
+                <tbody id="registersTableBody">
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">
+                            <span class="spinner-border spinner-border-sm me-2"></span> Reading PLC holding registers...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="p-3 bg-dark border-top border-secondary small text-muted d-flex justify-content-between align-items-center">
+            <span id="regCountLabel">Showing registers...</span>
+            <span class="font-monospace text-muted"><i class="bi bi-shield-check text-success me-1"></i> Parity Verified</span>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Register Bitwise Forensics -->
+<div class="modal fade" id="regDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content scada-modal-content">
+            <div class="modal-header border-secondary">
+                <div>
+                    <span class="badge bg-info font-monospace small mb-1" id="mRegAddr">40001</span>
+                    <h5 class="modal-title fw-bold text-white mb-0" id="mRegDesc">Register Description</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="p-3 bg-dark rounded border border-secondary mb-3 text-center">
+                    <span class="text-muted small d-block mb-1">Raw Hexadecimal Word:</span>
+                    <div class="fs-3 fw-bold text-cyan font-monospace" id="mRegHex">0x0000</div>
+                    <span class="small text-muted font-monospace d-block mt-1" id="mRegBin">0000000000000000</span>
+                </div>
+
+                <div class="row g-2 mb-3 small font-monospace">
+                    <div class="col-6">
+                        <div class="p-2 bg-dark rounded border border-secondary">
+                            <span class="text-muted d-block">Multiplier:</span>
+                            <strong class="text-white" id="mRegMult">1.0</strong>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2 bg-dark rounded border border-secondary">
+                            <span class="text-muted d-block">Scaled Engineering Val:</span>
+                            <strong class="text-warning" id="mRegScaled">0.0</strong>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2 bg-dark rounded border border-secondary">
+                            <span class="text-muted d-block">KKS Hardware Tag:</span>
+                            <strong class="text-cyan" id="mRegKKS">-</strong>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2 bg-dark rounded border border-secondary">
+                            <span class="text-muted d-block">Access Permission:</span>
+                            <span class="badge bg-secondary" id="mRegAccess">Read-Only</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-2 bg-dark rounded border border-secondary small text-muted">
+                    <i class="bi bi-clock me-1"></i> Last poll timestamp: <span class="font-monospace text-white" id="mRegSync">-</span>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-sm btn-scada-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("regSearchInput");
+    const blockSelect = document.getElementById("regBlockSelect");
+    const tbody = document.getElementById("registersTableBody");
+    const countLabel = document.getElementById("regCountLabel");
+
+    async function loadRegisters() {
+        const q = searchInput ? searchInput.value.trim() : "";
+        const blk = blockSelect ? blockSelect.value : "ALL";
+
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span> Reading PLC registers...</td></tr>`;
+
+        try {
+            const res = await fetch(`/api/v1/scada/registers?block=${encodeURIComponent(blk)}&q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                countLabel.innerText = `Showing ${data.count} registered PLC holding addresses`;
+
+                if (data.registers.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">No registers matching search criteria.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.registers.map(r => `
+                    <tr>
+                        <td class="font-monospace fw-bold text-info">${r.register_addr}</td>
+                        <td><span class="badge bg-dark border text-muted">${r.block_name}</span></td>
+                        <td class="font-monospace text-cyan">${r.kks_tag}</td>
+                        <td>${r.description}</td>
+                        <td><span class="hex-badge">${r.raw_hex}</span></td>
+                        <td class="font-monospace text-muted small">${r.raw_binary}</td>
+                        <td class="font-monospace text-warning fw-bold">${r.scaled_val} ${r.unit}</td>
+                        <td>
+                            <span class="badge ${r.read_only ? 'bg-secondary' : 'bg-primary'} font-monospace">
+                                ${r.read_only ? 'R/O' : 'R/W'}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-scada-secondary inspect-reg-btn" data-addr="${r.register_addr}">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Modal inspect handlers
+                document.querySelectorAll(".inspect-reg-btn").forEach(btn => {
+                    btn.addEventListener("click", async function () {
+                        const addr = this.getAttribute("data-addr");
+                        const dRes = await fetch(`/api/v1/scada/registers/${addr}`);
+                        const dJson = await dRes.json();
+                        if (dJson.status === 'success') {
+                            const reg = dJson.register;
+                            document.getElementById("mRegAddr").innerText = `HOLDING ADDR ${reg.register_addr}`;
+                            document.getElementById("mRegDesc").innerText = reg.description;
+                            document.getElementById("mRegHex").innerText = reg.raw_hex;
+                            document.getElementById("mRegBin").innerText = reg.raw_binary;
+                            document.getElementById("mRegMult").innerText = reg.scale_multiplier;
+                            document.getElementById("mRegScaled").innerText = `${reg.scaled_val} ${reg.unit}`;
+                            document.getElementById("mRegKKS").innerText = reg.kks_tag;
+                            document.getElementById("mRegAccess").innerText = reg.read_only ? 'Read-Only (Protected)' : 'Read-Write (Operational)';
+                            document.getElementById("mRegSync").innerText = reg.last_synced;
+                            new bootstrap.Modal(document.getElementById("regDetailModal")).show();
+                        }
+                    });
+                });
+            }
+        } catch (e) {
+            console.error("Registers load error", e);
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", loadRegisters);
+    }
+    if (blockSelect) {
+        blockSelect.addEventListener("change", loadRegisters);
+    }
+
+    loadRegisters();
+});
+</script>
+{% endblock %}

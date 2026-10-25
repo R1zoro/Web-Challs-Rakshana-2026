@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-industrial-navy text-white py-4 border-bottom border-warning">
+    <div class="container">
+        <h2 class="fw-bold mb-1">Contractor Requisition / RFQ Desk</h2>
+        <p class="text-light opacity-75 small mb-0">Generate formal Request for Quotation (RFQ) for core materials and consumables.</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            {% if notice %}
+            <div class="alert alert-{{ notice.type }} border-2 shadow-sm mb-4">
+                <h5 class="alert-heading fw-bold d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-info-circle-fill"></i> {{ notice.title }}
+                </h5>
+                <p class="mb-0 small">{{ notice.message }}</p>
+            </div>
+            {% endif %}
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white fw-bold py-3">
+                    <i class="bi bi-file-earmark-text me-1"></i> New Material Requisition Order
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('order_new') }}">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Contractor Entity</label>
+                                <input type="text" class="form-control bg-light" value="{{ session.org }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Authorized Inspector</label>
+                                <input type="text" class="form-control bg-light" value="{{ session.name }}" readonly>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Select Core Material</label>
+                            <select name="material" class="form-select" required>
+                                {% for item in catalog %}
+                                <option value="{{ item.name }}">{{ item.id }} — {{ item.name }} ({{ item.purity }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Requisition Quantity</label>
+                                <input type="text" name="quantity" class="form-control" placeholder="e.g. 12 assemblies / 50 kg" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Urgency Classification</label>
+                                <select name="urgency" class="form-select" required>
+                                    <option value="Routine Commercial">Routine Commercial (14 business days)</option>
+                                    <option value="Urgent Replenishment">Urgent Replenishment (4 business days)</option>
+                                    <option value="Critical Core Intervention">Critical Core Intervention (AERB Fast-track 24h)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Technical Justification & Destination Facility</label>
+                            <textarea name="justification" class="form-control" rows="3" placeholder="Provide project requisition code, reactor block number, or batch requirement..." required></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('orders') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Orders
+                            </a>
+                            <button type="submit" class="btn btn-gold px-4 fw-bold shadow-sm">
+                                <i class="bi bi-send-check me-1"></i>Submit RFQ Inquiry
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-light small text-muted">
+                    <i class="bi bi-info-circle me-1"></i> Note: Test and auditor accounts cannot execute financial debits directly.
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

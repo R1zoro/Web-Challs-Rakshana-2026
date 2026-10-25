@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+        <div>
+            <h5 class="fw-bold text-white mb-0">
+                <i class="bi bi-tools text-secondary me-2"></i>Lockout / Tagout (LOTO) & Nuclear Maintenance Work Orders
+            </h5>
+            <span class="small text-muted font-monospace">Radiation Zone Work Permits &bull; Safety Isolation Valve Tagouts &bull; ALARA Exposure Budgets</span>
+        </div>
+        <span class="badge bg-secondary font-monospace py-2 px-3" id="woCountBadge">
+            80 WORK ORDERS LOGGED
+        </span>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="scada-card p-3 mb-4">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <span class="small text-muted fw-bold me-2">Filter Work Order Status:</span>
+            <button type="button" class="btn btn-sm btn-scada-secondary active wo-filter-btn" data-status="ALL">All Orders (80)</button>
+            <button type="button" class="btn btn-sm btn-scada-secondary wo-filter-btn" data-status="LOTO_ACTIVE">Active LOTO Isolations</button>
+            <button type="button" class="btn btn-sm btn-scada-secondary wo-filter-btn" data-status="IN_PROGRESS">In Progress</button>
+            <button type="button" class="btn btn-sm btn-scada-secondary wo-filter-btn" data-status="COMPLETED">Completed</button>
+            <button type="button" class="btn btn-sm btn-scada-secondary wo-filter-btn" data-status="CLOSED">Closed Out</button>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="scada-card mb-4">
+        <div class="table-responsive">
+            <table class="table scada-table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">Work Order</th>
+                        <th>Job Title & Scope of Maintenance</th>
+                        <th>KKS Tag</th>
+                        <th>Substation</th>
+                        <th>Priority</th>
+                        <th>Isolation Valve</th>
+                        <th>Dosimeter Quota</th>
+                        <th>Status</th>
+                        <th class="text-end" style="width: 130px;">Permit</th>
+                    </tr>
+                </thead>
+                <tbody id="woTableBody">
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">
+                            <span class="spinner-border spinner-border-sm me-2"></span> Loading nuclear maintenance work orders...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for LOTO Permit Detail -->
+<div class="modal fade" id="woDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content scada-modal-content">
+            <div class="modal-header border-secondary">
+                <div>
+                    <span class="badge bg-danger font-monospace small mb-1" id="mWoId">WO-ID</span>
+                    <h5 class="modal-title fw-bold text-white mb-0" id="mWoTitle">Job Title</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="p-3 bg-dark rounded border border-secondary mb-3 small">
+                    <div class="row g-2">
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block">Target Equipment KKS:</span>
+                            <strong class="text-cyan font-monospace" id="mWoKKS">-</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block">Substation Sector:</span>
+                            <strong class="text-white" id="mWoSec">-</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block">LOTO Safety Isolation Tag:</span>
+                            <span class="badge bg-danger font-monospace fs-6" id="mWoValve">-</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block">Authorized ALARA Dose Budget:</span>
+                            <strong class="text-warning font-monospace" id="mWoDose">-</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-dark rounded border border-secondary mb-3 small">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Certified Lead Engineer Approval:</span>
+                        <strong class="text-white font-monospace" id="mWoAuth">-</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Assigned Mechanical/Electrical Technician:</span>
+                        <strong class="text-cyan font-monospace" id="mWoAssigned">-</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Permit Creation & Execution Date:</span>
+                        <span class="text-white font-monospace" id="mWoDate">-</span>
+                    </div>
+                </div>
+
+                <div class="p-2 bg-dark rounded border border-success small text-success">
+                    <i class="bi bi-shield-check me-1"></i> AERB Radiation Work Permit (RWP) Form C-12 Validated.
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-sm btn-scada-secondary" data-bs-dismiss="modal">Close Permit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let currentStatus = "ALL";
+    const tbody = document.getElementById("woTableBody");
+    const filterBtns = document.querySelectorAll(".wo-filter-btn");
+
+    async function loadWorkOrders() {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span> Loading work orders...</td></tr>`;
+
+        try {
+            const res = await fetch(`/api/v1/scada/work-orders?status=${encodeURIComponent(currentStatus)}`);
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                tbody.innerHTML = data.work_orders.map(wo => `
+                    <tr>
+                        <td class="font-monospace fw-bold text-primary">${wo.order_id}</td>
+                        <td><strong class="text-white d-block">${wo.title}</strong></td>
+                        <td class="font-monospace text-cyan">${wo.equipment_kks}</td>
+                        <td class="small text-muted">${wo.substation}</td>
+                        <td><span class="badge ${wo.priority === 'CRITICAL' ? 'bg-danger' : (wo.priority === 'URGENT' ? 'bg-warning text-dark' : 'bg-secondary')} font-monospace">${wo.priority}</span></td>
+                        <td><span class="badge bg-danger-subtle text-danger font-monospace">${wo.safety_isolation_valve}</span></td>
+                        <td class="font-monospace text-warning">${wo.dosimeter_budget_msv} mSv</td>
+                        <td>
+                            <span class="badge ${wo.status === 'LOTO_ACTIVE' ? 'bg-danger' : (wo.status === 'IN_PROGRESS' ? 'bg-warning text-dark' : 'bg-success')} font-monospace">
+                                ${wo.status}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-scada-secondary view-wo-btn" data-id="${wo.order_id}">
+                                <i class="bi bi-file-earmark-lock me-1"></i>LOTO
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Modal detail handlers
+                document.querySelectorAll(".view-wo-btn").forEach(btn => {
+                    btn.addEventListener("click", async function () {
+                        const woid = this.getAttribute("data-id");
+                        const dRes = await fetch(`/api/v1/scada/work-orders/${woid}`);
+                        const dJson = await dRes.json();
+                        if (dJson.status === 'success') {
+                            const wo = dJson.work_order;
+                            document.getElementById("mWoId").innerText = wo.order_id;
+                            document.getElementById("mWoTitle").innerText = wo.title;
+                            document.getElementById("mWoKKS").innerText = wo.equipment_kks;
+                            document.getElementById("mWoSec").innerText = wo.substation;
+                            document.getElementById("mWoValve").innerText = `VALVE ISOLATION: ${wo.safety_isolation_valve}`;
+                            document.getElementById("mWoDose").innerText = `${wo.dosimeter_budget_msv} mSv (ALARA Zone Max)`;
+                            document.getElementById("mWoAuth").innerText = wo.authorized_by;
+                            document.getElementById("mWoAssigned").innerText = wo.assigned_technician;
+                            document.getElementById("mWoDate").innerText = `${wo.created_date} (Closed: ${wo.completed_date || 'Active Task'})`;
+                            new bootstrap.Modal(document.getElementById("woDetailModal")).show();
+                        }
+                    });
+                });
+            }
+        } catch (e) {
+            console.error("Work orders load error", e);
+        }
+    }
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener("click", function () {
+            filterBtns.forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+            currentStatus = this.getAttribute("data-status");
+            loadWorkOrders();
+        });
+    });
+
+    loadWorkOrders();
+});
+</script>
+{% endblock %}

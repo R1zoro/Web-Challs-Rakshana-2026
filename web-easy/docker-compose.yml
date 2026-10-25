@@ -1,0 +1,34 @@
+services:
+  web_easy_proxy:
+    build: ./nginx
+    container_name: web_easy_proxy
+    ports:
+      - "8001:80"
+    depends_on:
+      - web_easy_app
+    networks:
+      - web_easy_internal
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 128M
+
+  web_easy_app:
+    build: ./app
+    container_name: web_easy_app
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - web_easy_internal
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 256M
+
+networks:
+  web_easy_internal:
+    driver: bridge

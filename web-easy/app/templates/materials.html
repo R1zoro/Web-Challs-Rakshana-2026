@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-industrial-navy text-white py-4 border-bottom border-warning">
+    <div class="container">
+        <h2 class="fw-bold mb-1">Approved Reactor Materials Catalog</h2>
+        <p class="text-light opacity-75 small mb-0">Certified specifications compliant with AERB Nuclear Fuel & Moderator Protocols.</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row g-4">
+        {% for item in catalog %}
+        <div class="col-md-6 col-lg-6">
+            <div class="card h-100 shadow-sm border-0 border-top border-4 border-warning">
+                <div class="row g-0 h-100">
+                    <div class="col-sm-5">
+                        <img src="{{ url_for('static', filename='images/' + item.image) }}" class="img-fluid rounded-start h-100 w-100 object-fit-cover" alt="{{ item.name }}" style="min-height: 220px;">
+                    </div>
+                    <div class="col-sm-7">
+                        <div class="card-body d-flex flex-column h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-dark font-monospace">{{ item.id }}</span>
+                                <span class="badge bg-secondary small">{{ item.category }}</span>
+                            </div>
+                            <h5 class="card-title fw-bold text-dark mt-2 mb-2">{{ item.name }}</h5>
+                            <p class="small text-muted flex-grow-1 mb-3">{{ item.desc }}</p>
+                            
+                            <div class="bg-light p-2 rounded border small mb-3">
+                                <div><strong>Assay Purity:</strong> {{ item.purity }}</div>
+                                <div><strong>Available Reserve:</strong> {{ item.stock }}</div>
+                                <div><strong>Compliance Code:</strong> <span class="text-primary font-monospace">{{ item.compliance }}</span></div>
+                            </div>
+
+                            {% if session.get('user') %}
+                            <a href="{{ url_for('order_new') }}" class="btn btn-sm btn-outline-dark w-100">
+                                <i class="bi bi-cart-plus me-1"></i>Prepare Requisition RFQ
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline-warning w-100 text-dark">
+                                <i class="bi bi-lock me-1"></i>Login to Requisition
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

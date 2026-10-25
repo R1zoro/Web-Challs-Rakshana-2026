@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Top System State Header -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-box">
+                <span class="metric-box-label">Reactor Core Status</span>
+                <div class="metric-box-value text-danger" id="coreStatusText">SCRAM LATCHED</div>
+                <div class="small text-light font-monospace"><i class="bi bi-shield-check text-success me-1"></i> 16/16 Absorber Rods Inserted</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-box">
+                <span class="metric-box-label">Primary Coolant Loop Pressure</span>
+                <div class="metric-box-value text-warning" id="phtPressureText">162.4 bar</div>
+                <div class="small text-light font-monospace">Statutory Trip Ceiling: 150.0 bar</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-box">
+                <span class="metric-box-label">Core Outlet Temperature</span>
+                <div class="metric-box-value text-danger" id="coreTempText">345.2 °C</div>
+                <div class="small text-light font-monospace">Delta-T Thermal Excursion Alert</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-box" style="border-left: 3px solid var(--scada-red);">
+                <span class="metric-box-label">Decay Heat Valve CV-201</span>
+                <div class="metric-box-value text-danger" style="font-size: 1.25rem;">LOCKED (TRIP 0x44)</div>
+                <div class="small text-warning font-monospace">PLC Controller Interlock Jam</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Process Summary & Quick Gauges -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="scada-card h-100">
+                <div class="scada-card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-activity text-cyan me-2"></i> Real-Time Annunciator & Trip Register Snapshot</span>
+                    <span class="badge bg-secondary font-monospace" id="activeAlarmsBadge">LOADING...</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table scada-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Alarm ID</th>
+                                <th>KKS Equipment Tag</th>
+                                <th>Description</th>
+                                <th>Process Value</th>
+                                <th>Setpoint</th>
+                                <th>Severity</th>
+                                <th>State</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overviewAlarmsBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <span class="spinner-border spinner-border-sm me-2"></span> Querying KAVACH SCADA Historian Database...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-2 px-3 bg-dark border-top border-secondary text-end small">
+                    <a href="/scada/historian" class="text-cyan text-decoration-none">Open Full 500+ Alarm Historian Database &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="scada-card h-100 d-flex flex-column">
+                <div class="scada-card-header">
+                    <i class="bi bi-diagram-3 text-warning me-2"></i> Substation & Controller Health
+                </div>
+                <div class="p-3 flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary small">
+                        <span class="text-light">Primary Circulation Pumps</span>
+                        <span class="badge bg-success-subtle text-success">PHT-01 .. PHT-04 TRIP RUNNING</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary small">
+                        <span class="text-light">Emergency Diesel Generators</span>
+                        <span class="badge bg-success-subtle text-success">EDG-01 & EDG-02 SYNCHRONIZED</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary small">
+                        <span class="text-light">Secondary Containment Pressure</span>
+                        <span class="badge bg-info-subtle text-info">-120 Pa NEGATIVE DOME</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary small">
+                        <span class="text-light">Safety Instrumented System (SIS)</span>
+                        <span class="badge bg-danger-subtle text-danger font-monospace">PLC-402 FAULT: TRIP 0x44</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 small">
+                        <span class="text-light">Remote Field Telemetry Nodes</span>
+                        <span class="badge bg-primary font-monospace">35/35 NODES ONLINE</span>
+                    </div>
+
+                    <div class="p-3 bg-dark rounded border border-warning mt-3 small text-light">
+                        <strong class="text-warning d-block mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>OPERATOR FORENSIC NOTICE:</strong>
+                        Primary coolant loop temperature is at 345.2 °C and heat dissipation is blocked by valve CV-201. Access the <strong>Field Diagnostics Gateway</strong> to trigger the controller firmware parity unlock.
+                    </div>
+                </div>
+                <div class="p-3 bg-dark border-top border-secondary">
+                    <a href="/scada/diagnostics" class="btn btn-scada-primary w-100 fw-bold">
+                        <i class="bi bi-terminal-split me-2"></i>Launch Field Diagnostic Console
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async function () {
+    try {
+        const res = await fetch('/api/v1/scada/alarms?limit=6');
+        const data = await res.json();
+        const tbody = document.getElementById('overviewAlarmsBody');
+        const badge = document.getElementById('activeAlarmsBadge');
+
+        if (data.status === 'success') {
+            badge.innerText = `${data.count} LATEST EVENTS`;
+            tbody.innerHTML = data.alarms.map(a => `
+                <tr>
+                    <td class="font-monospace fw-bold text-primary">${a.alarm_id}</td>
+                    <td class="font-monospace text-cyan">${a.kks_tag}</td>
+                    <td>${a.tag_description}</td>
+                    <td class="font-monospace text-warning">${a.process_val} ${a.engineering_unit}</td>
+                    <td class="font-monospace text-muted">${a.setpoint} ${a.engineering_unit}</td>
+                    <td>
+                        <span class="badge ${a.severity === 'CRITICAL' ? 'bg-danger' : (a.severity === 'HIGH' ? 'bg-warning text-dark' : 'bg-secondary')} font-monospace">
+                            ${a.severity}
+                        </span>
+                    </td>
+                    <td><span class="badge bg-dark border font-monospace text-white">${a.alarm_state}</span></td>
+                </tr>
+            `).join('');
+        }
+    } catch (e) {
+        console.error("Overview alarms fetch failed", e);
+    }
+});
+</script>
+{% endblock %}

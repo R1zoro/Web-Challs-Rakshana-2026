@@ -1,0 +1,217 @@
+<%- include('partials/header') %>
+
+<!-- Reports Banner -->
+<div class="py-4 bg-white border-bottom border-subtle">
+    <div class="container">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-light border border-subtle rounded-pill text-primary small fw-bold mb-2">
+            <span class="badge bg-primary">AERB PUBLIC REGISTER</span>
+            <span>SECTION 14 STATUTORY ENVIRONMENTAL & SAFETY DISCLOSURES</span>
+        </div>
+        <h2 class="fw-bold text-dark mb-1">
+            Public Reports & Regulatory Disclosures Archive
+        </h2>
+        <p class="text-secondary mb-0 small">
+            Statutory micro-radiological screening records, groundwater isotopic assays, primary heat transport mechanical audits, and civil protection readiness reports filed with the Atomic Energy Regulatory Board.
+        </p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="nrf-card mb-5">
+        <div class="nrf-card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <div>
+                <span class="fw-bold text-dark"><i class="bi bi-file-earmark-medical-fill text-primary me-2"></i> Statutory Documents Repository</span>
+                <span class="small text-muted d-block">Search official audit publications, technical evaluations, and environmental filings</span>
+            </div>
+            <span class="badge bg-light text-dark border font-monospace">STATUS: PUBLIC DISCLOSURE CLEARED</span>
+        </div>
+        <div class="p-4">
+            
+            <!-- Search Bar & Category Filters -->
+            <div class="row g-3 mb-4">
+                <div class="col-lg-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="reportSearchInput" class="form-control border-start-0 ps-0" placeholder="Search reports by keyword, circular code (e.g. AERB, tritium, plume, cooling)...">
+                    </div>
+                </div>
+                <div class="col-lg-6 d-flex flex-wrap gap-2 align-items-center">
+                    <span class="small text-muted fw-bold me-1">Category:</span>
+                    <button type="button" class="btn-filter-pill active" data-cat="All">All (<%= totalReports %>)</button>
+                    <button type="button" class="btn-filter-pill" data-cat="Environmental">Environmental</button>
+                    <button type="button" class="btn-filter-pill" data-cat="Compliance">Compliance</button>
+                    <button type="button" class="btn-filter-pill" data-cat="Technical">Technical</button>
+                    <button type="button" class="btn-filter-pill" data-cat="Civil Defense">Civil Defense</button>
+                </div>
+            </div>
+
+            <!-- Dynamic Reports Table -->
+            <div class="table-responsive">
+                <table class="table nrf-table align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 170px;">Circular Identifier</th>
+                            <th>Document Title & Statutory Disclosure Abstract</th>
+                            <th>Discipline</th>
+                            <th>Published Date</th>
+                            <th>Audit Status</th>
+                            <th class="text-end" style="width: 150px;">Document Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span> Querying statutory documents register...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Bottom Counter & Integrity Stamp -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-2 border-top small text-muted gap-2">
+                <span id="reportsCountLabel" class="fw-semibold">Showing records...</span>
+                <span><i class="bi bi-shield-check text-success me-1"></i> Certified authentic by AERB Information Disclosure Directorate</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Viewing Detailed Report Abstract & Full Finding -->
+<div class="modal fade" id="reportDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content nrf-card border-0">
+            <div class="modal-header bg-light border-bottom">
+                <div>
+                    <span class="badge bg-primary font-monospace small mb-1" id="modalRepId">REP-CODE</span>
+                    <h5 class="modal-title fw-bold text-dark mb-0" id="modalRepTitle">Report Title</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3 mb-3 pb-3 border-bottom small">
+                    <div class="col-sm-4">
+                        <span class="text-muted d-block">Authoring Wing / Lab</span>
+                        <strong class="text-dark" id="modalRepAuthor">-</strong>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted d-block">Category & Discipline</span>
+                        <span class="badge bg-light text-dark border" id="modalRepCategory">-</span>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted d-block">Publication & Assent Date</span>
+                        <span class="font-monospace text-dark" id="modalRepDate">-</span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark mb-2">Executive Summary & Statutory Disclosure:</h6>
+                    <p class="p-3 bg-light rounded border text-secondary small mb-3" id="modalRepSummary" style="line-height: 1.6;">-</p>
+
+                    <h6 class="fw-bold text-dark mb-2">Detailed Regulatory Findings & Assays:</h6>
+                    <div class="p-3 bg-light rounded border text-secondary small" id="modalRepFullText" style="line-height: 1.65; white-space: pre-wrap;">-</div>
+                </div>
+
+                <div class="p-3 rounded border bg-light d-flex justify-content-between align-items-center small">
+                    <div>
+                        <i class="bi bi-patch-check-fill text-success fs-5 me-2 align-middle"></i>
+                        <span>Regulatory Clearance: <strong>AERB Section 14 Public Verification</strong></span>
+                    </div>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle font-monospace" id="modalRepStatus">Verified</span>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close Document</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dynamic Reports Fetch Script -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let activeCategory = "All";
+    const searchInput = document.getElementById("reportSearchInput");
+    const tableBody = document.getElementById("reportsTableBody");
+    const countLabel = document.getElementById("reportsCountLabel");
+    const filterPills = document.querySelectorAll(".btn-filter-pill");
+
+    async function loadReports() {
+        const query = searchInput ? searchInput.value.trim() : "";
+        try {
+            const url = `/api/v1/reports/search?q=${encodeURIComponent(query)}&category=${encodeURIComponent(activeCategory)}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            if (!data.reports || data.reports.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No statutory disclosures matching "${query}".</td></tr>`;
+                countLabel.innerText = "Showing 0 matching records";
+                return;
+            }
+
+            countLabel.innerText = `Showing ${data.reports.length} matching disclosure record(s)`;
+            tableBody.innerHTML = data.reports.map(r => `
+                <tr>
+                    <td class="font-monospace fw-bold text-primary">${r.id}</td>
+                    <td>
+                        <strong class="text-dark d-block mb-1">${r.title}</strong>
+                        <span class="small text-muted">${r.summary.substring(0, 105)}...</span>
+                    </td>
+                    <td><span class="badge bg-light text-dark border">${r.category}</span></td>
+                    <td class="small text-muted font-monospace">${r.date}</td>
+                    <td><span class="badge badge-clean-safe">${r.status || 'Verified'}</span></td>
+                    <td class="text-end">
+                        <button type="button" class="btn btn-sm btn-outline-primary view-report-btn" data-rep-id="${r.id}">
+                            <i class="bi bi-file-earmark-text me-1"></i>View Full Record
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+
+            // Attach click handler to buttons
+            document.querySelectorAll(".view-report-btn").forEach(btn => {
+                btn.addEventListener("click", async function () {
+                    const repId = this.getAttribute("data-rep-id");
+                    const repRes = await fetch(`/api/v1/reports/${encodeURIComponent(repId)}`);
+                    const repJson = await repRes.json();
+                    if (repJson.status === "success") {
+                        const r = repJson.data;
+                        document.getElementById("modalRepId").innerText = r.id;
+                        document.getElementById("modalRepTitle").innerText = r.title;
+                        document.getElementById("modalRepAuthor").innerText = r.author;
+                        document.getElementById("modalRepCategory").innerText = r.category;
+                        document.getElementById("modalRepDate").innerText = r.date;
+                        document.getElementById("modalRepSummary").innerText = r.summary;
+                        document.getElementById("modalRepFullText").innerText = r.full_text || r.summary;
+                        document.getElementById("modalRepStatus").innerText = r.status || 'Verified';
+                        new bootstrap.Modal(document.getElementById("reportDetailModal")).show();
+                    }
+                });
+            });
+
+        } catch (err) {
+            console.error("Reports load error", err);
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            loadReports();
+        });
+    }
+
+    filterPills.forEach(pill => {
+        pill.addEventListener("click", function () {
+            filterPills.forEach(p => p.classList.remove("active"));
+            this.classList.add("active");
+            activeCategory = this.getAttribute("data-cat");
+            loadReports();
+        });
+    });
+
+    // Initial load
+    loadReports();
+});
+</script>
+
+<%- include('partials/footer') %>

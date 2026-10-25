@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+        <div>
+            <h5 class="fw-bold text-white mb-0">
+                <i class="bi bi-activity text-success me-2"></i>Instrument Loop Directory & Smart Transmitter Calibration Archive
+            </h5>
+            <span class="small text-muted font-monospace">HART Smart Field Instrumentation &bull; 4-20mA Current Loops &bull; Class 1E Nuclear Qualified</span>
+        </div>
+        <span class="badge bg-secondary font-monospace py-2 px-3" id="totalLoopsBadge">
+            TOTAL LOOPS: 150
+        </span>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="scada-card p-3 mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-5">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="loopSearchInput" class="form-control bg-dark border-secondary text-white" placeholder="Search loops by KKS tag, serial number (e.g. SN-2026), or transmitter manufacturer...">
+                </div>
+            </div>
+            <div class="col-lg-7 d-flex flex-wrap gap-2 justify-content-lg-end">
+                <span class="small text-muted fw-bold me-1 align-self-center">Sector:</span>
+                <select id="loopSectorSelect" class="form-select form-select-sm bg-dark border-secondary text-white" style="max-width: 250px;">
+                    <option value="ALL" selected>All Substation Sectors</option>
+                    <option value="Sector-A Reactor Island">Sector-A Reactor Island</option>
+                    <option value="Sector-B Aux Heat Exchanger Hall">Sector-B Aux Heat Exchanger</option>
+                    <option value="Sector-C Diesel Generator Vault">Sector-C Diesel Generator Vault</option>
+                    <option value="Sector-D Containment Dome">Sector-D Containment Dome</option>
+                    <option value="Sector-E Perimeter Mast">Sector-E Perimeter Mast</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loops Table -->
+    <div class="scada-card mb-4">
+        <div class="table-responsive">
+            <table class="table scada-table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">Loop Tag</th>
+                        <th style="width: 140px;">KKS Tag</th>
+                        <th>Service Descriptor</th>
+                        <th>Substation</th>
+                        <th>Manufacturer & Model</th>
+                        <th>Serial Number</th>
+                        <th>Loop Current</th>
+                        <th>Span Range</th>
+                        <th class="text-end" style="width: 130px;">Certificate</th>
+                    </tr>
+                </thead>
+                <tbody id="loopsTableBody">
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">
+                            <span class="spinner-border spinner-border-sm me-2"></span> Fetching instrument loops...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="p-3 bg-dark border-top border-secondary small text-muted d-flex justify-content-between align-items-center">
+            <span id="loopCountLabel">Showing loops...</span>
+            <span class="font-monospace text-muted"><i class="bi bi-shield-check text-success me-1"></i> NIST Traceable Calibration Records</span>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Calibration Certificate -->
+<div class="modal fade" id="loopCertModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content scada-modal-content">
+            <div class="modal-header border-secondary">
+                <div>
+                    <span class="badge bg-success font-monospace small mb-1" id="mLoopId">LOOP-ID</span>
+                    <h5 class="modal-title fw-bold text-white mb-0" id="mLoopTag">KKS TAG</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="p-3 bg-dark rounded border border-secondary mb-3">
+                    <span class="text-muted small d-block mb-1">Service & Parameter:</span>
+                    <h6 class="text-white fw-bold mb-0" id="mLoopDesc">-</h6>
+                </div>
+
+                <div class="row g-3 mb-3 small">
+                    <div class="col-sm-6">
+                        <span class="text-muted d-block">Manufacturer:</span>
+                        <strong class="text-white" id="mLoopMfg">-</strong>
+                    </div>
+                    <div class="col-sm-6">
+                        <span class="text-muted d-block">Model & Protocol:</span>
+                        <strong class="text-white" id="mLoopModel">-</strong>
+                    </div>
+                    <div class="col-sm-6">
+                        <span class="text-muted d-block">Serial Number:</span>
+                        <strong class="text-warning font-monospace" id="mLoopSerial">-</strong>
+                    </div>
+                    <div class="col-sm-6">
+                        <span class="text-muted d-block">HART Revision:</span>
+                        <span class="badge bg-secondary font-monospace" id="mLoopHart">-</span>
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-3 small font-monospace">
+                    <div class="col-sm-4">
+                        <div class="p-2 bg-dark rounded border border-secondary">
+                            <span class="text-muted d-block">Active Signal:</span>
+                            <strong class="text-cyan fs-6" id="mLoopCurrent">-</strong>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="p-2 bg-dark rounded border border-secondary">
+                            <span class="text-muted d-block">Calibrated Range:</span>
+                            <strong class="text-white fs-6" id="mLoopRange">-</strong>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="p-2 bg-dark rounded border border-secondary">
+                            <span class="text-muted d-block">Calibration Tolerance:</span>
+                            <strong class="text-success fs-6" id="mLoopTol">-</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-dark rounded border border-secondary small">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Last Certified Date:</span>
+                        <strong class="text-white font-monospace" id="mLoopDate">-</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Certified C&I Technician:</span>
+                        <strong class="text-warning font-monospace" id="mLoopTech">-</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-sm btn-scada-secondary" data-bs-dismiss="modal">Close Certificate</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("loopSearchInput");
+    const secSelect = document.getElementById("loopSectorSelect");
+    const tbody = document.getElementById("loopsTableBody");
+    const countLabel = document.getElementById("loopCountLabel");
+
+    async function loadLoops() {
+        const q = searchInput ? searchInput.value.trim() : "";
+        const sec = secSelect ? secSelect.value : "ALL";
+
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span> Querying instrument loop registry...</td></tr>`;
+
+        try {
+            const res = await fetch(`/api/v1/scada/instruments?sector=${encodeURIComponent(sec)}&q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                countLabel.innerText = `Showing ${data.count} registered instrument loops`;
+
+                if (data.instruments.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">No instrument loops matching search criteria.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.instruments.map(inst => `
+                    <tr>
+                        <td class="font-monospace fw-bold text-success">${inst.loop_id}</td>
+                        <td class="font-monospace text-cyan">${inst.kks_tag}</td>
+                        <td>${inst.service_description}</td>
+                        <td class="small text-muted">${inst.substation_sector}</td>
+                        <td>${inst.manufacturer} <span class="small text-muted d-block">${inst.model_number}</span></td>
+                        <td class="font-monospace text-warning small">${inst.serial_number}</td>
+                        <td><span class="badge bg-info-subtle text-info font-monospace">${inst.current_milliamp} mA</span></td>
+                        <td class="font-monospace small text-white">${inst.calibrated_range_low} - ${inst.calibrated_range_high} ${inst.unit}</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-scada-secondary view-cert-btn" data-kks="${inst.kks_tag}">
+                                <i class="bi bi-patch-check me-1"></i>Cert
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Modal view handlers
+                document.querySelectorAll(".view-cert-btn").forEach(btn => {
+                    btn.addEventListener("click", async function () {
+                        const kks = this.getAttribute("data-kks");
+                        const dRes = await fetch(`/api/v1/scada/instruments/${kks}`);
+                        const dJson = await dRes.json();
+                        if (dJson.status === 'success') {
+                            const l = dJson.loop;
+                            document.getElementById("mLoopId").innerText = l.loop_id;
+                            document.getElementById("mLoopTag").innerText = l.kks_tag;
+                            document.getElementById("mLoopDesc").innerText = l.service_description;
+                            document.getElementById("mLoopMfg").innerText = l.manufacturer;
+                            document.getElementById("mLoopModel").innerText = l.model_number;
+                            document.getElementById("mLoopSerial").innerText = l.serial_number;
+                            document.getElementById("mLoopHart").innerText = l.hart_revision;
+                            document.getElementById("mLoopCurrent").innerText = `${l.current_milliamp} mA`;
+                            document.getElementById("mLoopRange").innerText = `${l.calibrated_range_low} - ${l.calibrated_range_high} ${l.unit}`;
+                            document.getElementById("mLoopTol").innerText = `±${l.tolerance_percent}%`;
+                            document.getElementById("mLoopDate").innerText = l.last_calibrated;
+                            document.getElementById("mLoopTech").innerText = l.calibrated_by;
+                            new bootstrap.Modal(document.getElementById("loopCertModal")).show();
+                        }
+                    });
+                });
+            }
+        } catch (e) {
+            console.error("Instrument loops load error", e);
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", loadLoops);
+    }
+    if (secSelect) {
+        secSelect.addEventListener("change", loadLoops);
+    }
+
+    loadLoops();
+});
+</script>
+{% endblock %}

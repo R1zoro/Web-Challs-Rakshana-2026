@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+        <div>
+            <h5 class="fw-bold text-white mb-0">
+                <i class="bi bi-hdd-network-fill text-primary me-2"></i>Distributed RTU Field Nodes & Substation Network Topology
+            </h5>
+            <span class="small text-muted font-monospace">IEC 60870-5-104 / DNP3 Telemetry Bus &bull; Dual-Ring Optical Ethernet Architecture</span>
+        </div>
+        <span class="badge bg-primary font-monospace py-2 px-3" id="nodesCountBadge">
+            35 ACTIVE FIELD NODES
+        </span>
+    </div>
+
+    <!-- Nodes Grid -->
+    <div class="scada-card mb-4">
+        <div class="table-responsive">
+            <table class="table scada-table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">Node ID</th>
+                        <th>Node Name & Plant Function</th>
+                        <th>Substation Sector</th>
+                        <th>IP Address</th>
+                        <th>MAC Address</th>
+                        <th>Industrial Protocol</th>
+                        <th>Firmware</th>
+                        <th>Status</th>
+                        <th>RTT Latency</th>
+                        <th class="text-end" style="width: 130px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="nodesTableBody">
+                    <tr>
+                        <td colspan="10" class="text-center py-4 text-muted">
+                            <span class="spinner-border spinner-border-sm me-2"></span> Polling network node heartbeat table...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Live Node Ping Diagnostics -->
+<div class="modal fade" id="nodePingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content scada-modal-content">
+            <div class="modal-header border-secondary">
+                <div>
+                    <span class="badge bg-primary font-monospace small mb-1" id="mNodeId">RTU-ID</span>
+                    <h5 class="modal-title fw-bold text-white mb-0" id="mNodeName">Node Name</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center" id="nodeModalBody">
+                <!-- Populated dynamically -->
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-sm btn-scada-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async function () {
+    const tbody = document.getElementById("nodesTableBody");
+
+    try {
+        const res = await fetch('/api/v1/scada/nodes');
+        const data = await res.json();
+
+        if (data.status === 'success') {
+            tbody.innerHTML = data.nodes.map(n => `
+                <tr>
+                    <td class="font-monospace fw-bold text-primary">${n.node_id}</td>
+                    <td class="fw-semibold text-white">${n.name}</td>
+                    <td class="small text-muted">${n.substation_sector}</td>
+                    <td class="font-monospace text-cyan">${n.ip_address}</td>
+                    <td class="font-monospace text-muted small">${n.mac_address}</td>
+                    <td><span class="badge bg-dark border text-muted">${n.protocol}</span></td>
+                    <td class="font-monospace small text-warning">${n.firmware_version}</td>
+                    <td>
+                        <span class="badge ${n.status === 'ONLINE' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'} font-monospace">
+                            ${n.status}
+                        </span>
+                    </td>
+                    <td class="font-monospace text-white">${n.latency_ms} ms</td>
+                    <td class="text-end">
+                        <button type="button" class="btn btn-sm btn-scada-primary ping-node-btn" data-id="${n.node_id}">
+                            <i class="bi bi-broadcast me-1"></i>Ping
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Modal Ping Handlers
+            document.querySelectorAll(".ping-node-btn").forEach(btn => {
+                btn.addEventListener("click", async function () {
+                    const nid = this.getAttribute("data-id");
+                    const mBody = document.getElementById("nodeModalBody");
+                    mBody.innerHTML = `
+                        <div class="py-4">
+                            <span class="spinner-border spinner-border-sm text-cyan mb-2"></span>
+                            <div class="small text-muted font-monospace">Dispatching ICMP & DNP3 keep-alive packet to ${nid}...</div>
+                        </div>
+                    `;
+                    new bootstrap.Modal(document.getElementById("nodePingModal")).show();
+
+                    const pRes = await fetch(`/api/v1/scada/nodes/${nid}/health`);
+                    const pJson = await pRes.json();
+                    if (pJson.status === 'success') {
+                        document.getElementById("mNodeId").innerText = pJson.node_id;
+                        document.getElementById("mNodeName").innerText = pJson.name;
+                        mBody.innerHTML = `
+                            <div class="p-3 bg-dark rounded border border-secondary mb-3 text-start small font-monospace">
+                                <div class="text-success mb-2"><i class="bi bi-check-circle-fill me-1"></i> Heartbeat Acknowledged: 64 bytes received</div>
+                                <div class="text-muted mb-1">Target IP: <strong class="text-cyan">${pJson.ip_address}</strong></div>
+                                <div class="text-muted mb-1">Industrial Protocol: <strong class="text-white">${pJson.protocol}</strong></div>
+                                <div class="text-muted mb-1">Round-Trip Time: <strong class="text-warning">${pJson.rtt_ms} ms</strong></div>
+                                <div class="text-muted mb-1">Firmware Build: <strong class="text-white">${pJson.firmware}</strong></div>
+                                <div class="text-muted">Synchronized Timestamp: <span class="text-white">${pJson.last_sync}</span></div>
+                            </div>
+                            <span class="badge bg-success font-monospace py-2 px-3">NODE HEALTH: 100% NOMINAL</span>
+                        `;
+                    }
+                });
+            });
+        }
+    } catch (e) {
+        console.error("Nodes load error", e);
+    }
+});
+</script>
+{% endblock %}

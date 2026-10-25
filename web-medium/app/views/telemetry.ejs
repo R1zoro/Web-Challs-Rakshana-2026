@@ -1,0 +1,219 @@
+<%- include('partials/header') %>
+
+<!-- Telemetry Header Banner -->
+<div class="py-4 bg-white border-bottom border-subtle">
+    <div class="container">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-light border border-subtle rounded-pill text-primary small fw-bold mb-2">
+                    <span class="badge bg-primary">AERB-PIRTN</span>
+                    <span>REAL-TIME CIVIL DEFENSE TELEMETRY FEED</span>
+                </div>
+                <h2 class="fw-bold text-dark mb-1">
+                    Environmental Radiation & Perimeter Telemetry Network
+                </h2>
+                <p class="text-secondary mb-0 small">
+                    Continuous multi-azimuth gamma spectroscopy, meteorological wind dispersion vectors, and containment dome differential pressures published under Section 14 statutory guidelines.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <span class="badge badge-clean-safe py-2 px-3 font-monospace fs-6">
+                    <i class="bi bi-broadcast me-1"></i> SENSORS ACTIVE &bull; 100% ONLINE
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Top Gauges Strip -->
+    <div class="row g-4 mb-4">
+        <!-- Gauge 1: Average Gamma -->
+        <div class="col-md-4">
+            <div class="nrf-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="metric-label">Perimeter Average Gamma</span>
+                    <span class="badge badge-clean-safe">NOMINAL</span>
+                </div>
+                <div class="metric-value text-dark" id="gaugeAmbientRad">0.284 µSv/h</div>
+                <div class="metric-sub d-flex align-items-center gap-1 mt-2">
+                    <span class="badge bg-light text-dark border font-monospace">Statutory Limit: 1.00 µSv/h</span>
+                </div>
+                <div class="small text-muted mt-3">
+                    <i class="bi bi-clock-history me-1"></i> Running 15-minute rolling geometric mean
+                </div>
+            </div>
+        </div>
+
+        <!-- Gauge 2: Met Tower Wind Vector -->
+        <div class="col-md-4">
+            <div class="nrf-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="metric-label">Met Tower Plume Vector</span>
+                    <span class="badge bg-light text-dark border">60m MAST</span>
+                </div>
+                <div class="metric-value text-dark" style="font-size: 1.45rem;">ENE @ 14.2 km/h</div>
+                <div class="metric-sub d-flex align-items-center gap-1 mt-2">
+                    <span class="badge bg-light text-dark border font-monospace">Pasquill Class: D (Neutral)</span>
+                </div>
+                <div class="small text-muted mt-3">
+                    <i class="bi bi-compass me-1"></i> Dispersion Corridor: Outer Ring Road Buffer Zone
+                </div>
+            </div>
+        </div>
+
+        <!-- Gauge 3: Containment Pressure -->
+        <div class="col-md-4">
+            <div class="nrf-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="metric-label">Containment Delta Pressure</span>
+                    <span class="badge badge-clean-safe">-120 Pa (Negative)</span>
+                </div>
+                <div class="metric-value text-dark" style="font-size: 1.45rem;">-0.12 kPa</div>
+                <div class="metric-sub d-flex align-items-center gap-1 mt-2">
+                    <span class="badge bg-light text-dark border font-monospace">Seal Status: 100% Sealed</span>
+                </div>
+                <div class="small text-muted mt-3">
+                    <i class="bi bi-shield-check text-success me-1"></i> Double-walled pre-stressed envelope secure
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Perimeter Sensor Grid -->
+    <div class="d-flex justify-content-between align-items-end mb-3 border-bottom pb-2">
+        <div>
+            <h5 class="fw-bold text-dark mb-0">Multi-Azimuth Boundary Radiation Detectors (GM Stations)</h5>
+            <span class="small text-muted">Real-time ionization rates calibrated against BARC Caesium-137 primary standards</span>
+        </div>
+        <span class="badge bg-light text-secondary border font-monospace">SAMPLING RATE: 500ms</span>
+    </div>
+
+    <div class="row g-3 mb-5">
+        <div class="col-md-4">
+            <div class="metric-tile">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong class="text-dark">North Perimeter Fence</strong>
+                    <span class="badge badge-clean-safe">0.12 µSv/h</span>
+                </div>
+                <div class="small text-muted">Detector GM-01 &bull; Sector 22 Residential Buffer</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="metric-tile">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong class="text-dark">Cooling Tower Effluent Drain</strong>
+                    <span class="badge badge-clean-safe">0.14 µSv/h</span>
+                </div>
+                <div class="small text-muted">Detector GM-02 &bull; Secondary cooling discharge</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="metric-tile" style="border-left: 4px solid var(--status-warn);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong class="text-dark">Reactor Containment Outer Wall</strong>
+                    <span class="badge badge-clean-warn">0.28 µSv/h</span>
+                </div>
+                <div class="small text-muted">Detector GM-03 &bull; Elevated thermal boundary reading</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="metric-tile">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong class="text-dark">Spent Fuel Pool Bay 3</strong>
+                    <span class="badge badge-clean-safe">0.22 µSv/h</span>
+                </div>
+                <div class="small text-muted">Detector GM-04 &bull; Fuel storage water shield nominal</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="metric-tile">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong class="text-dark">Turbine Hall Aux Line</strong>
+                    <span class="badge badge-clean-safe">0.10 µSv/h</span>
+                </div>
+                <div class="small text-muted">Detector GM-05 &bull; Auxiliary line baseline nominal</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="metric-tile">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong class="text-dark">Campus South Public Gate</strong>
+                    <span class="badge badge-clean-safe">0.09 µSv/h</span>
+                </div>
+                <div class="small text-muted">Detector GM-06 &bull; Pedestrian entry baseline background</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Telemetry Visualizer Radar Canvas -->
+    <div class="nrf-card mb-5">
+        <div class="nrf-card-header d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-dark">
+                <i class="bi bi-radar text-primary me-2"></i>Perimeter Isotropic Dispersion Radar & Diagnostic Visualizer
+            </span>
+            <span class="badge bg-light text-dark border font-monospace">RADAR ENGINE: ACTIVE</span>
+        </div>
+        <div class="p-4 text-center">
+            <div class="d-flex justify-content-center mb-3">
+                <canvas id="telemetryRadarCanvas" width="480" height="320" style="background: #0f172a; border-radius: 8px; max-width: 100%; height: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);"></canvas>
+            </div>
+            <p class="small text-muted mb-0">
+                Visualizer driven by compiled diagnostic modules (<span class="font-monospace text-dark">telemetry-core.chunk.js</span>, <span class="font-monospace text-dark">radar-visualizer.js</span>). Micro-spectrometry vectors polled synchronously.
+            </p>
+        </div>
+    </div>
+
+    <!-- Active Safety Bulletins -->
+    <div class="nrf-card">
+        <div class="nrf-card-header d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-dark">
+                <i class="bi bi-megaphone-fill text-warning me-2"></i>Current Telemetry & Operational Bulletins
+            </span>
+            <span class="small text-muted font-monospace">SOURCE: INCIDENT-PORTAL.INTERNAL</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table nrf-table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">Bulletin ID</th>
+                        <th>Subject & Technical Detail</th>
+                        <th>Classification</th>
+                        <th>Recorded Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="fw-bold font-monospace text-primary">BUL-2026-101</td>
+                        <td>
+                            <strong class="text-dark d-block">Secondary Cooling Loop Pressure Oscillation</strong>
+                            <span class="small text-muted">Pneumatic pressure variance observed during auxiliary emergency valve recalibration. Containment contingency active.</span>
+                        </td>
+                        <td><span class="badge badge-clean-warn">Advisory Notice</span></td>
+                        <td class="small text-muted font-monospace">21-Oct-2026</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold font-monospace text-primary">BUL-2026-098</td>
+                        <td>
+                            <strong class="text-dark d-block">Scheduled Civil Defense Perimeter Siren Drill</strong>
+                            <span class="small text-muted">Routine bi-weekly acoustic verification executed across Sector 22 Rohini municipal quadrant.</span>
+                        </td>
+                        <td><span class="badge badge-clean-safe">Informational</span></td>
+                        <td class="small text-muted font-monospace">18-Oct-2026</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold font-monospace text-primary">BUL-2026-092</td>
+                        <td>
+                            <strong class="text-dark d-block">Q3 AERB Environmental Isotope Monitoring Clearance</strong>
+                            <span class="small text-muted">Statutory quarterly groundwater and air particulate assays certified within prescribed AERB thresholds.</span>
+                        </td>
+                        <td><span class="badge badge-clean-safe">Statutory Compliance</span></td>
+                        <td class="small text-muted font-monospace">12-Oct-2026</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,32 @@
+services:
+  web_hard_proxy:
+    build: ./nginx
+    container_name: web_hard_proxy
+    ports:
+      - "8003:80"
+    depends_on:
+      - web_hard_app
+    networks:
+      - web_hard_internal
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 128M
+
+  web_hard_app:
+    build: ./app
+    container_name: web_hard_app
+    networks:
+      - web_hard_internal
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 256M
+
+networks:
+  web_hard_internal:
+    driver: bridge

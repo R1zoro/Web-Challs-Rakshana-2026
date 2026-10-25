@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Vendors Banner -->
+<div class="bg-dark text-white py-4 border-bottom border-warning border-3">
+    <div class="container">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-secondary rounded-pill text-warning small fw-bold mb-2">
+            <span class="badge bg-warning text-dark">SUPPLY CHAIN</span>
+            <span>AERB REGISTERED STRATEGIC CONTRACTORS</span>
+        </div>
+        <h2 class="fw-bold text-white mb-1">
+            <i class="bi bi-buildings-fill text-warning me-2"></i>Empanelled Industrial Suppliers & QA Contractors
+        </h2>
+        <p class="text-light opacity-75 mb-0 small">
+            National directory of approved nuclear-grade fabricators, metallurgy testing laboratories, precision valve specialists, and authorized external QA inspectors.
+        </p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Search Bar -->
+    <div class="card bg-white shadow-sm border-0 mb-4 p-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="vendorSearch" class="form-control" placeholder="Search vendor name, clearance code or location...">
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end text-muted small">
+                <i class="bi bi-shield-check text-success me-1"></i> Active ISO-19443 & AERB Quality Conformance Registry
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendors Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-industrial-navy text-white d-flex justify-content-between align-items-center py-3">
+            <span class="fw-bold"><i class="bi bi-building-check me-2"></i>Empanelled Vendor Master Register</span>
+            <span class="badge bg-warning text-dark font-monospace" id="vendorCountBadge">Showing {{ vendors|length }} Vendors</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="vendorsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 160px;">Vendor Code</th>
+                        <th>Enterprise Name & Registered Facility</th>
+                        <th>Empanelled Scope & Category</th>
+                        <th>Quality Standard</th>
+                        <th>AERB Clearance Seal</th>
+                        <th>Validity</th>
+                        <th class="text-end">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="vendorsTbody">
+                    {% for v in vendors %}
+                    <tr class="vendor-row" data-name="{{ v.company_name|lower }}" data-code="{{ v.vendor_id|lower }}" data-loc="{{ v.location|lower }}" data-cat="{{ v.empanelment_category|lower }}">
+                        <td class="font-monospace fw-bold text-primary">{{ v.vendor_id }}</td>
+                        <td>
+                            <strong class="text-dark d-block mb-1">{{ v.company_name }}</strong>
+                            <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i>{{ v.location }}</span>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">{{ v.empanelment_category }}</span></td>
+                        <td class="font-monospace small text-muted">{{ v.iso_cert }}</td>
+                        <td class="font-monospace small fw-bold text-success">{{ v.aerb_clearance }}</td>
+                        <td class="font-monospace small text-muted">{{ v.valid_till }}</td>
+                        <td class="text-end">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle-fill me-1"></i>Empanelled</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("vendorSearch");
+    const rows = document.querySelectorAll(".vendor-row");
+    const badge = document.getElementById("vendorCountBadge");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const q = this.value.toLowerCase().trim();
+            let count = 0;
+            rows.forEach(r => {
+                const name = r.getAttribute("data-name");
+                const code = r.getAttribute("data-code");
+                const loc = r.getAttribute("data-loc");
+                const cat = r.getAttribute("data-cat");
+                if (!q || name.includes(q) || code.includes(q) || loc.includes(q) || cat.includes(q)) {
+                    r.style.display = "";
+                    count++;
+                } else {
+                    r.style.display = "none";
+                }
+            });
+            badge.innerText = `Showing ${count} Vendors`;
+        });
+    }
+});
+</script>
+
+{% endblock %}

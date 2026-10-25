@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Circulars Banner -->
+<div class="bg-dark text-white py-4 border-bottom border-warning border-3">
+    <div class="container">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-secondary rounded-pill text-warning small fw-bold mb-2">
+            <span class="badge bg-warning text-dark">STATUTORY GAZETTE</span>
+            <span>AERB & NPCIL REGULATORY DIRECTIVES</span>
+        </div>
+        <h2 class="fw-bold text-white mb-1">
+            <i class="bi bi-journal-text text-warning me-2"></i>Official Circulars & Compliance Directives
+        </h2>
+        <p class="text-light opacity-75 mb-0 small">
+            Statutory quality mandates, nuclear material transport safety rules, and contractor grievance filing procedures published under the Atomic Energy Act.
+        </p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Search Bar -->
+    <div class="card bg-white shadow-sm border-0 mb-4 p-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="circularSearch" class="form-control" placeholder="Search circular code, subject or keyword...">
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end text-muted small">
+                <i class="bi bi-shield-check text-success me-1"></i> Certified authentic repository by AERB Legal & Licensing Wing
+            </div>
+        </div>
+    </div>
+
+    <!-- Circulars Grid -->
+    <div class="row g-4" id="circularsGrid">
+        {% for c in circulars %}
+        <div class="col-md-6 circular-card" data-title="{{ c.title|lower }}" data-ref="{{ c.ref|lower }}" data-summary="{{ c.summary|lower }}">
+            <div class="card h-100 shadow-sm border-0 border-start border-warning border-4">
+                <div class="card-body d-flex flex-column p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-dark font-monospace">{{ c.ref }}</span>
+                        <span class="badge bg-light text-dark border small">{{ c.category }}</span>
+                    </div>
+                    <h5 class="card-title fw-bold text-dark mb-2">{{ c.title }}</h5>
+                    <div class="small text-muted mb-3 font-monospace">
+                        <i class="bi bi-building me-1"></i>{{ c.issuing_authority }} &bull; {{ c.date }}
+                    </div>
+                    <p class="small text-secondary flex-grow-1 mb-4">
+                        {{ c.summary }}
+                    </p>
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                        <span class="small text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Gazetted & Active</span>
+                        <button type="button" class="btn btn-sm btn-outline-dark view-circ-btn" data-ref="{{ c.ref }}">
+                            <i class="bi bi-file-earmark-text me-1"></i>Read Full Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal for Circular Full Text -->
+<div class="modal fade" id="circularDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-industrial-navy text-white">
+                <div>
+                    <span class="badge bg-warning text-dark font-monospace mb-1" id="mCircRef">CIRC-REF</span>
+                    <h5 class="modal-title fw-bold mb-0" id="mCircTitle">Circular Title</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="p-3 bg-light rounded border mb-3 small">
+                    <div class="d-flex justify-content-between">
+                        <span><strong>Issuing Directorate:</strong> <span id="mCircAuth">-</span></span>
+                        <span><strong>Effective Date:</strong> <span id="mCircDate" class="font-monospace">-</span></span>
+                    </div>
+                </div>
+                <h6 class="fw-bold text-dark mb-2">Statutory Text & Operative Clauses</h6>
+                <div class="p-4 bg-white border rounded font-monospace small mb-3 lh-lg" id="mCircText" style="white-space: pre-wrap;">
+                    Full text...
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("circularSearch");
+    const cards = document.querySelectorAll(".circular-card");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const q = this.value.toLowerCase().trim();
+            cards.forEach(c => {
+                const title = c.getAttribute("data-title");
+                const ref = c.getAttribute("data-ref");
+                const sum = c.getAttribute("data-summary");
+                if (!q || title.includes(q) || ref.includes(q) || sum.includes(q)) {
+                    c.style.display = "";
+                } else {
+                    c.style.display = "none";
+                }
+            });
+        });
+    }
+
+    document.querySelectorAll(".view-circ-btn").forEach(btn => {
+        btn.addEventListener("click", async function () {
+            const ref = this.getAttribute("data-ref");
+            try {
+                const res = await fetch(`/api/v1/circulars/${encodeURIComponent(ref)}`);
+                const data = await res.json();
+                if (data.status === "success") {
+                    const c = data.circular;
+                    document.getElementById("mCircRef").innerText = c.ref;
+                    document.getElementById("mCircTitle").innerText = c.title;
+                    document.getElementById("mCircAuth").innerText = c.issuing_authority;
+                    document.getElementById("mCircDate").innerText = c.date;
+                    document.getElementById("mCircText").innerText = c.full_text || c.summary;
+                    new bootstrap.Modal(document.getElementById("circularDetailModal")).show();
+                }
+            } catch (err) {
+                console.error("Failed to load circular", err);
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

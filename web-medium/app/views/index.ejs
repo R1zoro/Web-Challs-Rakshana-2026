@@ -1,0 +1,238 @@
+<%- include('partials/header') %>
+
+<!-- Indian Institutional Rolling News Flash Ticker -->
+<div class="nrf-ticker-bar py-2">
+    <div class="container d-flex align-items-center">
+        <span class="nrf-ticker-title me-3">
+            <i class="bi bi-broadcast me-1"></i> Circulars Flash
+        </span>
+        <div class="nrf-ticker-track flex-grow-1">
+            <div class="nrf-ticker-marquee text-light opacity-90" id="tickerMarquee">
+                <% tickerNews.forEach(function(item) { %>
+                    <%= item %> &bull; 
+                <% }); %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clean Institutional Hero Banner -->
+<div class="py-5 bg-white border-bottom border-subtle">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-light border border-subtle rounded-pill text-primary small fw-bold mb-3">
+                    <span class="badge bg-primary">AERB-PIRTN</span>
+                    <span>NATIONAL STRATEGIC NUCLEAR RESEARCH & CIVIL RADIOLOGICAL PROTECTION</span>
+                </div>
+                <h1 class="display-6 fw-bold text-dark mb-3">
+                    MAIT Nuclear Research Facility (MAIT-NRF)
+                </h1>
+                <p class="lead text-secondary mb-4 col-lg-11 fs-6">
+                    A premier center for thermal neutron physics, heavy water reactor engineering, cancer-imaging radioisotope synthesis, and continuous urban environmental radiation surveillance under statutory AERB civil defense directives.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="/telemetry" class="btn btn-institutional-primary px-4 py-2 shadow-sm">
+                        <i class="bi bi-speedometer2 me-2"></i>Live Telemetry & Sensors
+                    </a>
+                    <a href="/reports" class="btn btn-outline-secondary px-4 py-2">
+                        <i class="bi bi-file-earmark-medical me-2"></i>Public Disclosure Archive
+                    </a>
+                    <a href="/research" class="btn btn-outline-primary px-4 py-2">
+                        <i class="bi bi-journal-text me-2"></i>Research Publications
+                    </a>
+                </div>
+            </div>
+
+            <!-- Perimeter Status High-Contrast Card -->
+            <div class="col-lg-4">
+                <div class="nrf-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <h6 class="text-uppercase fw-bold text-dark mb-0 small">Perimeter Summary</h6>
+                        <span class="badge badge-clean-safe">SENSORS ONLINE</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="metric-label d-block">Average Perimeter Gamma</span>
+                        <div class="metric-value text-dark" id="gaugeAmbientRad">0.284 µSv/h</div>
+                        <div class="metric-sub d-flex align-items-center gap-1">
+                            <span class="badge bg-light text-dark border font-monospace">Statutory Limit: 1.00 µSv/h</span>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="mb-2">
+                        <span class="metric-label d-block">Met Tower Wind Vector</span>
+                        <div class="fw-bold text-dark font-monospace small">ENE @ 14.2 km/h (Pasquill-D)</div>
+                        <div class="small text-muted">Outer Ring Road Dispersion Corridor</div>
+                    </div>
+
+                    <div class="p-2 bg-light rounded border text-muted small mt-3 d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-shield-check text-success me-1"></i> Core Status: <strong>10 MWth Nominal</strong></span>
+                        <a href="/telemetry" class="small fw-bold text-primary text-decoration-none">Full Feed &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Institutional Metrics Strip -->
+<div class="container my-5">
+    <div class="row g-4 text-center">
+        <div class="col-6 col-md-3">
+            <div class="nrf-card p-3">
+                <div class="display-6 fw-bold text-primary">10 MWth</div>
+                <div class="small fw-semibold text-dark mt-1">Research Core Rating</div>
+                <div class="small text-muted">Heavy water moderated</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="nrf-card p-3">
+                <div class="display-6 fw-bold text-success"><%= totalReports %></div>
+                <div class="small fw-semibold text-dark mt-1">Statutory Disclosures</div>
+                <div class="small text-muted">AERB verified records</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="nrf-card p-3">
+                <div class="display-6 fw-bold text-info"><%= totalResearch %></div>
+                <div class="small fw-semibold text-dark mt-1">Published Research</div>
+                <div class="small text-muted">Peer-reviewed papers</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="nrf-card p-3">
+                <div class="display-6 fw-bold text-warning"><%= totalNotifications %></div>
+                <div class="small fw-semibold text-dark mt-1">Gazette Circulars</div>
+                <div class="small text-muted">Public compliance notices</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Institutional Pillars / Core Mandates -->
+<div class="container my-5">
+    <div class="row g-4 align-items-stretch">
+        <div class="col-lg-4">
+            <div class="nrf-card h-100 p-4 d-flex flex-column">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="p-3 bg-primary-subtle text-primary rounded-3 fs-3">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">Public Radiological Safety</h5>
+                        <span class="small text-muted font-monospace">AERB Section 14 Mandate</span>
+                    </div>
+                </div>
+                <p class="small text-secondary flex-grow-1">
+                    Continuous 24/7 monitoring of boundary gamma exposure, air particulate radioactivity, and groundwater tritium levels across Sector 22 Rohini municipal catchments with open public transparency.
+                </p>
+                <a href="/reports" class="btn btn-sm btn-outline-primary mt-2">
+                    <i class="bi bi-file-earmark-text me-1"></i>View Surveillance Audits &rarr;
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="nrf-card h-100 p-4 d-flex flex-column">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="p-3 bg-info-subtle text-info rounded-3 fs-3">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">Advanced Nuclear Engineering</h5>
+                        <span class="small text-muted font-monospace">10 MWth Heavy Water Core</span>
+                    </div>
+                </div>
+                <p class="small text-secondary flex-grow-1">
+                    High-flux neutron extraction for thermal powder diffraction, cold neutron beam guides, thorium-232 breeding studies, and deterministic thermal-hydraulic safety analysis.
+                </p>
+                <a href="/facility" class="btn btn-sm btn-outline-primary mt-2">
+                    <i class="bi bi-gear-wide-connected me-1"></i>Core Specifications & Directives &rarr;
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="nrf-card h-100 p-4 d-flex flex-column">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="p-3 bg-success-subtle text-success rounded-3 fs-3">
+                        <i class="bi bi-prescription2"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">Nuclear Medicine Synthesis</h5>
+                        <span class="small text-muted font-monospace">Mo-99, Lu-177, I-131</span>
+                    </div>
+                </div>
+                <p class="small text-secondary flex-grow-1">
+                    Direct fission and radiative capture isotope separation supplying medical-grade radioisotopes to regional cancer hospitals across Delhi-NCR for diagnostic SPECT imaging and targeted radiotherapy.
+                </p>
+                <a href="/research" class="btn btn-sm btn-outline-primary mt-2">
+                    <i class="bi bi-journal-text me-1"></i>Accomplishments & Publications &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Highlights: Gazette Circulars & Upcoming Events -->
+<div class="container my-5">
+    <div class="row g-4">
+        <!-- Recent Gazette Circulars -->
+        <div class="col-lg-6">
+            <div class="nrf-card h-100">
+                <div class="nrf-card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark">
+                        <i class="bi bi-bell-fill text-primary me-2"></i>Recent Gazette Notifications
+                    </span>
+                    <a href="/notifications" class="small fw-bold text-primary text-decoration-none">View All (<%= totalNotifications %>) &rarr;</a>
+                </div>
+                <div class="p-0">
+                    <div class="list-group list-group-flush">
+                        <% recentNotifications.forEach(function(item) { %>
+                        <div class="list-group-item p-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="badge bg-light text-dark border font-monospace small"><%= item.ref %></span>
+                                <span class="small text-muted font-monospace"><%= item.date %></span>
+                            </div>
+                            <strong class="text-dark d-block mb-1" style="font-size: 0.925rem;"><%= item.title %></strong>
+                            <p class="small text-secondary mb-0"><%= item.summary.substring(0, 120) %>...</p>
+                        </div>
+                        <% }); %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Civil Defense & Technical Events -->
+        <div class="col-lg-6">
+            <div class="nrf-card h-100">
+                <div class="nrf-card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark">
+                        <i class="bi bi-calendar-event-fill text-warning me-2"></i>Upcoming Events & Civil Drills
+                    </span>
+                    <a href="/events" class="small fw-bold text-primary text-decoration-none">Full Calendar (<%= totalEvents %>) &rarr;</a>
+                </div>
+                <div class="p-0">
+                    <div class="list-group list-group-flush">
+                        <% upcomingEvents.forEach(function(item) { %>
+                        <div class="list-group-item p-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="badge <%= item.status === 'Upcoming' ? 'badge-clean-warn' : 'badge-clean-safe' %>"><%= item.type %></span>
+                                <span class="small text-muted font-monospace"><%= item.date %></span>
+                            </div>
+                            <strong class="text-dark d-block mb-1" style="font-size: 0.925rem;"><%= item.title %></strong>
+                            <div class="small text-muted mb-1"><i class="bi bi-geo-alt me-1"></i><%= item.location %></div>
+                            <p class="small text-secondary mb-0"><%= item.description.substring(0, 110) %>...</p>
+                        </div>
+                        <% }); %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

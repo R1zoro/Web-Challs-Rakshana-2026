@@ -1,0 +1,135 @@
+<%- include('partials/header') %>
+
+<!-- Gazette Banner -->
+<div class="py-4 bg-white border-bottom border-subtle">
+    <div class="container">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-light border border-subtle rounded-pill text-primary small fw-bold mb-2">
+            <span class="badge bg-primary">OFFICIAL GAZETTE</span>
+            <span>PUBLIC NOTICES, CIRCULARS & PROCUREMENT TENDERS</span>
+        </div>
+        <h2 class="fw-bold text-dark mb-1">
+            Gazette Notifications & Official Circulars Archive
+        </h2>
+        <p class="text-secondary mb-0 small">
+            Statutory administrative orders, nuclear procurement tenders, environmental monitoring advisories, and off-site siren drill schedules issued by MAIT-NRF and AERB.
+        </p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="nrf-card mb-5">
+        <div class="nrf-card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <div>
+                <span class="fw-bold text-dark"><i class="bi bi-bell-fill text-primary me-2"></i> Official Gazette Index</span>
+                <span class="small text-muted d-block">Filter gazetted notices, tenders, and administrative directives</span>
+            </div>
+            <span class="badge bg-light text-dark border font-monospace">TOTAL: <%= notifications.length %> CIRCULARS</span>
+        </div>
+        <div class="p-4">
+            <!-- Search & Filters -->
+            <div class="row g-3 mb-4">
+                <div class="col-lg-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="notifSearchInput" class="form-control border-start-0 ps-0" placeholder="Search notices by keyword or reference (e.g. tender, siren, resin)...">
+                    </div>
+                </div>
+                <div class="col-lg-7 d-flex flex-wrap gap-2 align-items-center justify-content-lg-end">
+                    <span class="small text-muted fw-bold me-1">Category:</span>
+                    <button type="button" class="btn-filter-pill active" data-cat="All">All</button>
+                    <button type="button" class="btn-filter-pill" data-cat="Regulatory Gazette">Gazette</button>
+                    <button type="button" class="btn-filter-pill" data-cat="Procurement">Procurement</button>
+                    <button type="button" class="btn-filter-pill" data-cat="Civil Defense">Civil Defense</button>
+                    <button type="button" class="btn-filter-pill" data-cat="Public Notice">Public Notice</button>
+                    <button type="button" class="btn-filter-pill" data-cat="Operations">Operations</button>
+                </div>
+            </div>
+
+            <!-- Notifications Table -->
+            <div class="table-responsive">
+                <table class="table nrf-table align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 170px;">Gazette Ref</th>
+                            <th>Subject & Regulatory Abstract</th>
+                            <th>Originating Division</th>
+                            <th>Published Date</th>
+                            <th>Category</th>
+                            <th class="text-end" style="width: 120px;">Notice Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="notifTableBody">
+                        <% notifications.forEach(function(item) { %>
+                        <tr class="notif-row" data-cat="<%= item.category %>" data-keywords="<%= (item.title + ' ' + item.ref + ' ' + item.department + ' ' + item.summary).toLowerCase() %>">
+                            <td class="font-monospace fw-bold text-primary"><%= item.ref %></td>
+                            <td>
+                                <strong class="text-dark d-block mb-1"><%= item.title %></strong>
+                                <span class="small text-secondary"><%= item.summary %></span>
+                            </td>
+                            <td class="small text-muted"><%= item.department %></td>
+                            <td class="small text-muted font-monospace"><%= item.date %></td>
+                            <td><span class="badge bg-light text-dark border"><%= item.category %></span></td>
+                            <td class="text-end">
+                                <span class="badge <%= item.status === 'Open' || item.status === 'Active' ? 'badge-clean-safe' : 'bg-light text-dark border' %>"><%= item.status %></span>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top small text-muted">
+                <span id="notifCountLabel">Showing <%= notifications.length %> records</span>
+                <span><i class="bi bi-shield-check text-success me-1"></i> Official Government Gazette Repository</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let activeCat = "All";
+    const searchInput = document.getElementById("notifSearchInput");
+    const rows = document.querySelectorAll(".notif-row");
+    const countLabel = document.getElementById("notifCountLabel");
+    const filterPills = document.querySelectorAll(".btn-filter-pill");
+
+    function filterNotifs() {
+        const q = searchInput ? searchInput.value.trim().toLowerCase() : "";
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const rowCat = row.getAttribute("data-cat");
+            const keywords = row.getAttribute("data-keywords");
+            const matchesCat = (activeCat === "All" || rowCat === activeCat);
+            const matchesQ = (!q || keywords.includes(q));
+
+            if (matchesCat && matchesQ) {
+                row.style.display = "";
+                visibleCount++;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        if (countLabel) {
+            countLabel.innerText = `Showing ${visibleCount} record(s)`;
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", filterNotifs);
+    }
+
+    filterPills.forEach(pill => {
+        pill.addEventListener("click", function () {
+            filterPills.forEach(p => p.classList.remove("active"));
+            this.classList.add("active");
+            activeCat = this.getAttribute("data-cat");
+            filterNotifs();
+        });
+    });
+});
+</script>
+
+<%- include('partials/footer') %>

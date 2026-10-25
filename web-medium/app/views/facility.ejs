@@ -1,0 +1,217 @@
+<%- include('partials/header') %>
+
+<!-- Facility Banner -->
+<div class="py-4 bg-white border-bottom border-subtle">
+    <div class="container">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-light border border-subtle rounded-pill text-primary small fw-bold mb-2">
+            <span class="badge bg-primary">INFRASTRUCTURE & COMPLIANCE</span>
+            <span>MAIT NUCLEAR RESEARCH FACILITY TECHNICAL PROFILE</span>
+        </div>
+        <h2 class="fw-bold text-dark mb-1">
+            Facility Specifications & Statutory Safety Directives
+        </h2>
+        <p class="text-secondary mb-0 small">
+            Engineering parameters of the 10 MWth heavy water research core, multi-barrier containment envelopes, AERB operating licenses, and capital resource allocations.
+        </p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- General Profile Strip -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-12">
+            <div class="nrf-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <h5 class="fw-bold text-dark mb-0">General Facility Profile</h5>
+                    <span class="badge badge-clean-safe">AERB LICENSED FACILITY</span>
+                </div>
+                <div class="row g-3 small">
+                    <div class="col-md-6 col-lg-4">
+                        <span class="text-muted d-block">Operating Designation</span>
+                        <strong class="text-dark"><%= facilityData.general.name %></strong>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <span class="text-muted d-block">Statutory Regulatory Authority</span>
+                        <strong class="text-dark"><%= facilityData.general.supervising_authority %></strong>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <span class="text-muted d-block">Operating License Code</span>
+                        <strong class="text-primary font-monospace"><%= facilityData.general.operating_license %></strong>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <span class="text-muted d-block">Physical Coordinates & Address</span>
+                        <span class="text-dark"><%= facilityData.general.site_location %></span>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <span class="text-muted d-block">Commissioning & Operation Period</span>
+                        <span class="text-dark">Commercial Operation Since <%= facilityData.general.commissioning_year %></span>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <span class="text-muted d-block">Campus & Protective Buffer</span>
+                        <span class="text-dark"><%= facilityData.general.campus_area %></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reactor Core Technical Specifications -->
+    <div class="nrf-card mb-5">
+        <div class="nrf-card-header d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-dark"><i class="bi bi-gear-wide-connected text-primary me-2"></i> Reactor Core & Neutronic Specifications</span>
+            <span class="badge bg-light text-dark border font-monospace">10 MWth THERMAL RATING</span>
+        </div>
+        <div class="p-4">
+            <div class="table-responsive">
+                <table class="table nrf-table">
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold text-dark" style="width: 35%;">Reactor Core Type</td>
+                            <td><%= facilityData.reactor_specs.reactor_type %></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Rated Thermal Power Capacity</td>
+                            <td><%= facilityData.reactor_specs.rated_thermal_power %></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Peak Thermal Flux Density</td>
+                            <td class="font-monospace"><%= facilityData.reactor_specs.peak_thermal_flux %></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Peak Fast Neutron Flux</td>
+                            <td class="font-monospace"><%= facilityData.reactor_specs.peak_fast_flux %></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Fissile Fuel Composition</td>
+                            <td><%= facilityData.reactor_specs.fuel_composition %></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Core Lattice Loading</td>
+                            <td><%= facilityData.reactor_specs.fuel_assembly_type %> (<%= facilityData.reactor_specs.number_of_fuel_assemblies %>)</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Moderator Heavy Water Inventory</td>
+                            <td><%= facilityData.reactor_specs.moderator_inventory %></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Primary Core Coolant Loop</td>
+                            <td><%= facilityData.reactor_specs.core_coolant %></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Reactor Pool Shield Dimensions</td>
+                            <td><%= facilityData.reactor_specs.reactor_pool_dimensions %></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Defense-In-Depth Safety Systems -->
+    <div class="nrf-card mb-5">
+        <div class="nrf-card-header">
+            <span class="fw-bold text-dark"><i class="bi bi-shield-check text-success me-2"></i> Multi-Layer Defense-In-Depth Engineered Safeguards</span>
+        </div>
+        <div class="p-4">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded border h-100">
+                        <strong class="text-dark d-block mb-1"><i class="bi bi-arrow-down-square-fill text-danger me-2"></i>Primary Fast Shutdown (SCRAM)</strong>
+                        <p class="small text-secondary mb-0"><%= facilityData.safety_systems.primary_shutdown %></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded border h-100">
+                        <strong class="text-dark d-block mb-1"><i class="bi bi-droplet-half text-primary me-2"></i>Secondary Liquid Poison Shutdown (BAEIS)</strong>
+                        <p class="small text-secondary mb-0"><%= facilityData.safety_systems.secondary_shutdown %></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded border h-100">
+                        <strong class="text-dark d-block mb-1"><i class="bi bi-box-seam-fill text-secondary me-2"></i>Containment Building Envelope</strong>
+                        <p class="small text-secondary mb-0"><%= facilityData.safety_systems.containment %></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded border h-100">
+                        <strong class="text-dark d-block mb-1"><i class="bi bi-cloud-snow text-info me-2"></i>Emergency Core Makeup Tank (ECMT)</strong>
+                        <p class="small text-secondary mb-0"><%= facilityData.safety_systems.emergency_cooling %></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded border h-100">
+                        <strong class="text-dark d-block mb-1"><i class="bi bi-arrow-repeat text-success me-2"></i>Passive Natural Convection Decay Heat Removal</strong>
+                        <p class="small text-secondary mb-0"><%= facilityData.safety_systems.decay_heat_removal %></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded border h-100">
+                        <strong class="text-dark d-block mb-1"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Emergency Backup Power Generation</strong>
+                        <p class="small text-secondary mb-0"><%= facilityData.safety_systems.emergency_power %></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statutory AERB Directives -->
+    <div class="nrf-card mb-5">
+        <div class="nrf-card-header">
+            <span class="fw-bold text-dark"><i class="bi bi-file-earmark-lock-fill text-danger me-2"></i> Active AERB Nuclear Safety Directives</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table nrf-table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 170px;">Directive Code</th>
+                        <th>Directive Title</th>
+                        <th>Enforced Operational Mandate</th>
+                        <th class="text-end">Compliance Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% facilityData.safety_directives.forEach(function(dir) { %>
+                    <tr>
+                        <td class="font-monospace fw-bold text-primary"><%= dir.code %></td>
+                        <td class="fw-semibold text-dark"><%= dir.title %></td>
+                        <td class="small text-secondary"><%= dir.requirement %></td>
+                        <td class="text-end"><span class="badge badge-clean-safe">Mandatory Enforced</span></td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Capital Budget & Expenditure Breakdown -->
+    <div class="nrf-card">
+        <div class="nrf-card-header d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-dark"><i class="bi bi-cash-stack text-success me-2"></i> Statutory Capital Allocation & Expenditure Breakdown</span>
+            <span class="badge bg-light text-dark border font-monospace">TOTAL: ₹482.50 CRORES</span>
+        </div>
+        <div class="p-4">
+            <div class="table-responsive">
+                <table class="table nrf-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Programmatic Head</th>
+                            <th class="text-end">Statutory Allocation (₹ Crores)</th>
+                            <th class="text-end">Budget Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% facilityData.budget_breakdown.forEach(function(b) { %>
+                        <tr>
+                            <td class="fw-semibold text-dark"><%= b.head %></td>
+                            <td class="text-end font-monospace fw-bold text-primary">₹ <%= b.allocation_inr_cr %> Cr</td>
+                            <td class="text-end"><span class="badge bg-light text-dark border"><%= b.percentage %></span></td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

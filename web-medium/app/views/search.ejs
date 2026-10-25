@@ -1,0 +1,164 @@
+<%- include('partials/header') %>
+
+<!-- Universal Search Banner -->
+<div class="py-4 bg-white border-bottom border-subtle">
+    <div class="container">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-light border border-subtle rounded-pill text-primary small fw-bold mb-2">
+            <span class="badge bg-primary">UNIVERSAL REPOSITORY INDEX</span>
+            <span>SEARCH ACROSS ALL STATUTORY GAZETTES, REPORTS, EVENTS & RESEARCH</span>
+        </div>
+        <h2 class="fw-bold text-dark mb-1">
+            Universal Search Results
+        </h2>
+        <p class="text-secondary mb-0 small">
+            <% if (query) { %>
+                Displaying search matches for keyword <strong class="text-dark font-monospace">"<%= query %>"</strong> across all institutional records.
+            <% } else { %>
+                Enter a search query in the search bar above to query all portal databases.
+            <% } %>
+        </p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Search Query Bar -->
+    <div class="nrf-card p-4 mb-4">
+        <form action="/search" method="GET" class="row g-3">
+            <div class="col-lg-10">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" value="<%= query %>" class="form-control border-start-0 ps-0" placeholder="Search across all reports, gazettes, events, and scientific publications...">
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <button type="submit" class="btn btn-institutional-primary w-100">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Summary Counts -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 border-bottom pb-3 gap-2">
+        <h5 class="fw-bold text-dark mb-0">
+            Total Results Found: <span class="badge bg-primary fs-6 font-monospace"><%= totalMatches %></span>
+        </h5>
+        <div class="d-flex flex-wrap gap-2 small">
+            <span class="badge bg-light text-dark border">Reports: <%= matchedReports.length %></span>
+            <span class="badge bg-light text-dark border">Gazettes: <%= matchedNotifications.length %></span>
+            <span class="badge bg-light text-dark border">Events: <%= matchedEvents.length %></span>
+            <span class="badge bg-light text-dark border">Research: <%= matchedResearch.length %></span>
+        </div>
+    </div>
+
+    <% if (totalMatches === 0) { %>
+    <div class="nrf-card p-5 text-center my-4">
+        <i class="bi bi-folder-x text-muted display-4 mb-3 d-block"></i>
+        <h5 class="fw-bold text-dark">No matching statutory records found</h5>
+        <p class="text-secondary small mb-4">
+            Try adjusting your query or searching for broader terms such as <span class="font-monospace">tritium</span>, <span class="font-monospace">scram</span>, <span class="font-monospace">siren</span>, <span class="font-monospace">cooling</span>, <span class="font-monospace">aerb</span>, or <span class="font-monospace">thorium</span>.
+        </p>
+        <a href="/" class="btn btn-sm btn-outline-primary">Return to Homepage</a>
+    </div>
+    <% } %>
+
+    <!-- Matched Reports Section -->
+    <% if (matchedReports.length > 0) { %>
+    <div class="mb-5">
+        <h5 class="fw-bold text-dark mb-3">
+            <i class="bi bi-file-earmark-medical-fill text-primary me-2"></i>Statutory Reports & Audits (<%= matchedReports.length %>)
+        </h5>
+        <div class="row g-3">
+            <% matchedReports.forEach(function(r) { %>
+            <div class="col-12">
+                <div class="nrf-card p-3 doc-card">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <span class="badge bg-primary font-monospace small"><%= r.id %></span>
+                        <span class="small text-muted font-monospace"><%= r.date %></span>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1"><%= r.title %></h6>
+                    <div class="small text-muted mb-2"><i class="bi bi-building me-1"></i><%= r.author %> &bull; <span class="badge bg-light text-dark border"><%= r.category %></span></div>
+                    <p class="small text-secondary mb-2"><%= r.summary %></p>
+                    <a href="/reports" class="small fw-semibold text-primary text-decoration-none">Open in Reports Repository &rarr;</a>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+    </div>
+    <% } %>
+
+    <!-- Matched Gazette Notifications -->
+    <% if (matchedNotifications.length > 0) { %>
+    <div class="mb-5">
+        <h5 class="fw-bold text-dark mb-3">
+            <i class="bi bi-bell-fill text-warning me-2"></i>Gazette Notifications & Tenders (<%= matchedNotifications.length %>)
+        </h5>
+        <div class="row g-3">
+            <% matchedNotifications.forEach(function(n) { %>
+            <div class="col-12">
+                <div class="nrf-card p-3 doc-card">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <span class="badge bg-light text-dark border font-monospace small"><%= n.ref %></span>
+                        <span class="small text-muted font-monospace"><%= n.date %></span>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1"><%= n.title %></h6>
+                    <div class="small text-muted mb-2"><%= n.department %> &bull; <span class="badge bg-light text-dark border"><%= n.category %></span></div>
+                    <p class="small text-secondary mb-2"><%= n.summary %></p>
+                    <a href="/notifications" class="small fw-semibold text-primary text-decoration-none">Open in Gazette Index &rarr;</a>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+    </div>
+    <% } %>
+
+    <!-- Matched Events -->
+    <% if (matchedEvents.length > 0) { %>
+    <div class="mb-5">
+        <h5 class="fw-bold text-dark mb-3">
+            <i class="bi bi-calendar-event-fill text-info me-2"></i>Events & Civil Defense Drills (<%= matchedEvents.length %>)
+        </h5>
+        <div class="row g-3">
+            <% matchedEvents.forEach(function(e) { %>
+            <div class="col-12">
+                <div class="nrf-card p-3 doc-card">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <span class="badge <%= e.status === 'Upcoming' ? 'badge-clean-warn' : 'badge-clean-safe' %>"><%= e.type %></span>
+                        <span class="small text-muted font-monospace"><%= e.date %> (<%= e.time %>)</span>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1"><%= e.title %></h6>
+                    <div class="small text-muted mb-2"><i class="bi bi-geo-alt me-1 text-danger"></i><%= e.location %></div>
+                    <p class="small text-secondary mb-2"><%= e.description %></p>
+                    <a href="/events" class="small fw-semibold text-primary text-decoration-none">Open in Events Calendar &rarr;</a>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+    </div>
+    <% } %>
+
+    <!-- Matched Research Papers -->
+    <% if (matchedResearch.length > 0) { %>
+    <div class="mb-5">
+        <h5 class="fw-bold text-dark mb-3">
+            <i class="bi bi-journal-text text-success me-2"></i>Research Publications (<%= matchedResearch.length %>)
+        </h5>
+        <div class="row g-3">
+            <% matchedResearch.forEach(function(res) { %>
+            <div class="col-12">
+                <div class="nrf-card p-3 doc-card">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <span class="badge bg-primary font-monospace small"><%= res.id %></span>
+                        <span class="small text-muted font-monospace"><%= res.date %></span>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1"><%= res.title %></h6>
+                    <div class="small text-primary fw-semibold mb-2"><i class="bi bi-people me-1"></i><%= res.authors %></div>
+                    <p class="small text-secondary mb-2"><%= res.abstract.substring(0, 180) %>...</p>
+                    <a href="/research" class="small fw-semibold text-primary text-decoration-none">Open in Research Catalog &rarr;</a>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+    </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,78 @@
+<%- include('partials/header') %>
+
+<div class="container my-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+
+            <% if (error) { %>
+            <div class="alert alert-danger d-flex align-items-center mb-4 border-danger shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-5 me-2 text-danger"></i>
+                <div class="small fw-semibold"><%= error %></div>
+            </div>
+            <% } %>
+
+            <div class="row g-4">
+                <!-- Option 1: 1-Click Public Observer Access -->
+                <div class="col-md-6">
+                    <div class="nrf-card h-100 d-flex flex-column">
+                        <div class="nrf-card-header d-flex justify-content-between align-items-center">
+                            <span class="badge badge-clean-safe">OPEN ACCESS</span>
+                            <span class="small text-muted font-monospace">LEVEL-1</span>
+                        </div>
+                        <div class="p-4 d-flex flex-column flex-grow-1">
+                            <h5 class="fw-bold text-dark mb-2">Public Observer Session</h5>
+                            <p class="small text-secondary mb-4 flex-grow-1">
+                                Review statutory environmental gamma absorption levels, weather dispersion metrics, and public safety announcements without elevated clearance.
+                            </p>
+                            <form method="POST" action="/login">
+                                <input type="hidden" name="login_type" value="guest">
+                                <button type="submit" class="btn btn-institutional-primary w-100 py-2 fw-semibold shadow-sm">
+                                    <i class="bi bi-person-check-fill me-1"></i>Continue as Public Observer
+                                </button>
+                            </form>
+                        </div>
+                        <div class="p-3 bg-light border-top small text-muted">
+                            <i class="bi bi-info-circle me-1"></i> Issues standard read-only telemetry session token.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Option 2: Internal Staff Credentials -->
+                <div class="col-md-6">
+                    <div class="nrf-card h-100 d-flex flex-column">
+                        <div class="nrf-card-header d-flex justify-content-between align-items-center">
+                            <span class="badge badge-clean-warn">RESTRICTED</span>
+                            <span class="small text-muted font-monospace">LEVEL-3+ SCRAM</span>
+                        </div>
+                        <div class="p-4 flex-grow-1">
+                            <h5 class="fw-bold text-dark mb-2">Operational Control Room</h5>
+                            <p class="small text-secondary mb-3">
+                                Sign in with certified personnel credentials for reactor control room access and SCRAM actuation.
+                            </p>
+                            <form method="POST" action="/login">
+                                <input type="hidden" name="login_type" value="staff">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-dark mb-1">Personnel Username / ID</label>
+                                    <input type="text" name="username" class="form-control" placeholder="e.g. NRF-EMP-8821 or username">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-dark mb-1">Security Passphrase</label>
+                                    <input type="password" name="password" class="form-control" placeholder="••••••••••••">
+                                </div>
+                                <button type="submit" class="btn btn-institutional w-100 py-2 fw-semibold shadow-sm">
+                                    <i class="bi bi-shield-lock-fill me-1"></i>Control Room Sign In
+                                </button>
+                            </form>
+                        </div>
+                        <div class="p-3 bg-light border-top small text-muted">
+                            <i class="bi bi-shield-exclamation me-1"></i> Only accounts with <strong>Level-3+ clearance</strong> (e.g. commander) may access primary reactor relays.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,35 @@
+services:
+  web_medium_proxy:
+    build: ./nginx
+    container_name: web_medium_proxy
+    ports:
+      - "8002:80"
+    depends_on:
+      - web_medium_app
+    networks:
+      - web_medium_internal
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 128M
+
+  web_medium_app:
+    build: ./app
+    container_name: web_medium_app
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+    networks:
+      - web_medium_internal
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 256M
+
+networks:
+  web_medium_internal:
+    driver: bridge

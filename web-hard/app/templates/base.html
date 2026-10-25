@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAVACH-SCADA v4.8 | MAIT Nuclear Research Facility</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/static/css/scada-theme.css?v=3">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- Top Industrial Status Bar (High Contrast) -->
+    <div class="scada-topbar d-flex flex-wrap justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <span class="scada-led scada-led-red"></span>
+            <strong class="text-white">CORE STATUS: SCRAM LATCHED</strong>
+            <span class="text-secondary">|</span>
+            <span class="badge bg-warning text-dark font-monospace fw-bold">POST-TRIP RECOVERY MODE</span>
+            <span class="text-secondary d-none d-md-inline">|</span>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace d-none d-md-inline">
+                AERB Directive 2026/14 Armed
+            </span>
+        </div>
+        <div class="d-flex align-items-center gap-3 font-monospace small">
+            <span class="text-light">Node: <strong class="text-cyan">INDUS-SCADA-01</strong> &bull; Sector-22 Substation</span>
+            <span class="text-light">SysTime: <strong class="text-warning" id="scadaClock">--:--:--</strong></span>
+        </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-xl scada-navbar py-2">
+        <div class="container-fluid px-3">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/scada/overview">
+                <span class="scada-brand-tag">KAVACH-4.8</span>
+                <span class="scada-brand-title">INDUS SCADA Gateway</span>
+            </a>
+
+            <button class="navbar-toggler bg-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#scadaNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="scadaNav">
+                <ul class="navbar-nav me-auto mb-2 mb-xl-0 gap-1 ps-xl-3">
+                    <li class="nav-item">
+                        <a class="nav-link scada-nav-item" href="/scada/overview">
+                            <i class="bi bi-grid-fill me-1 text-primary"></i>Overview
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link scada-nav-item" href="/scada/mimic">
+                            <i class="bi bi-diagram-3-fill me-1 text-cyan"></i>Process Mimic
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link scada-nav-item" href="/scada/historian">
+                            <i class="bi bi-clock-history me-1 text-warning"></i>Alarm Historian
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link scada-nav-item" href="/scada/registers">
+                            <i class="bi bi-cpu-fill me-1 text-info"></i>PLC Registers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link scada-nav-item" href="/scada/instruments">
+                            <i class="bi bi-activity me-1 text-success"></i>Instruments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link scada-nav-item" href="/scada/nodes">
+                            <i class="bi bi-hdd-network-fill me-1 text-primary"></i>Field RTUs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link scada-nav-item" href="/scada/maintenance">
+                            <i class="bi bi-tools me-1 text-secondary"></i>Maintenance (LOTO)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link scada-nav-item" href="/scada/diagnostics">
+                            <i class="bi bi-terminal-split me-1 text-cyan"></i>Diagnostics
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-dark border border-secondary text-info font-monospace px-3 py-2 fw-semibold">
+                        <i class="bi bi-person-badge-fill text-cyan me-1"></i>OPERATOR: scada_op (L3 Access)
+                    </span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Emergency Condition Strip -->
+    <div class="scada-emergency-strip d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+        <span>
+            <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+            <strong>INTERLOCK ANOMALY:</strong> Secondary Decay Heat Circulation Dump Valve <code class="text-white bg-dark px-2 py-1 rounded">CV-201</code> is locked shut. Firmware recovery interlock required.
+        </span>
+        <a href="/scada/diagnostics" class="btn btn-sm btn-danger text-nowrap font-monospace fw-bold">
+            <i class="bi bi-terminal-split me-1"></i>Open Diagnostic Probe &rarr;
+        </a>
+    </div>
+
+    <!-- Main Content Body -->
+    <main class="flex-grow-1 p-3 p-lg-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Industrial Footer -->
+    <footer class="scada-topbar py-2 text-center text-light small border-top border-secondary">
+        <span>MAIT Nuclear Research Facility (MAIT-NRF) &bull; Control & Instrumentation Directorate</span> | 
+        <span class="font-monospace text-cyan">AERB-OT-KAVACH-SYS-2026</span>
+    </footer>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const el = document.getElementById('scadaClock');
+            if (el) el.innerText = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0').slice(0, 2);
+        }
+        setInterval(updateClock, 100);
+        updateClock();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

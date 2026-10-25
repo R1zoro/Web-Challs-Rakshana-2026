@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Tenders Banner -->
+<div class="bg-dark text-white py-4 border-bottom border-warning border-3">
+    <div class="container">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-secondary rounded-pill text-warning small fw-bold mb-2">
+            <span class="badge bg-warning text-dark">CPP PORTAL</span>
+            <span>CENTRAL PUBLIC PROCUREMENT & TENDER NOTICES</span>
+        </div>
+        <h2 class="fw-bold text-white mb-1">
+            <i class="bi bi-file-earmark-ruled-fill text-warning me-2"></i>Active Tenders & Requests for Quotation (RFQ)
+        </h2>
+        <p class="text-light opacity-75 mb-0 small">
+            Official technical procurement notices for reactor core assemblies, reactivity poison elements, specialized forgings, and certified nuclear QA surveillance services.
+        </p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Filter and Search Controls -->
+    <div class="card bg-white shadow-sm border-0 mb-4 p-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="tenderSearch" class="form-control" placeholder="Search tender title, tender number or specs...">
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="d-flex flex-wrap gap-2 align-items-center justify-content-lg-end">
+                    <span class="small text-muted fw-bold">Division:</span>
+                    <button class="btn btn-sm btn-outline-dark division-btn active" data-div="All">All</button>
+                    {% for div in divisions %}
+                    <button class="btn btn-sm btn-outline-dark division-btn" data-div="{{ div }}">{{ div }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tenders Listing Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-industrial-navy text-white d-flex justify-content-between align-items-center py-3">
+            <span class="fw-bold"><i class="bi bi-list-check me-2"></i>Official Tender Notice Register</span>
+            <span class="badge bg-warning text-dark font-monospace" id="tenderCountBadge">Showing {{ tenders|length }} Tenders</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="tendersTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 170px;">Tender Number</th>
+                        <th>Work Scope & Technical Description</th>
+                        <th>Division</th>
+                        <th>Est. Value</th>
+                        <th>Closing Date</th>
+                        <th>Status</th>
+                        <th class="text-end" style="width: 140px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tendersTbody">
+                    {% for t in tenders %}
+                    <tr class="tender-row" data-div="{{ t.division }}" data-title="{{ t.title|lower }}" data-no="{{ t.tender_no|lower }}" data-spec="{{ t.specifications|lower }}">
+                        <td class="font-monospace fw-bold text-primary">{{ t.tender_no }}</td>
+                        <td>
+                            <strong class="text-dark d-block mb-1">{{ t.title }}</strong>
+                            <span class="small text-muted">{{ t.specifications[:110] }}...</span>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">{{ t.division }}</span></td>
+                        <td class="font-monospace small fw-bold text-dark">{{ t.est_value }}</td>
+                        <td class="font-monospace small text-muted">{{ t.closing_date }}</td>
+                        <td>
+                            {% if 'Active' in t.status %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">{{ t.status }}</span>
+                            {% elif 'Triaging' in t.status %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">{{ t.status }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ t.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-primary view-tender-btn" data-tno="{{ t.tender_no }}">
+                                <i class="bi bi-eye me-1"></i>View Details
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Tender Details -->
+<div class="modal fade" id="tenderDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-industrial-navy text-white">
+                <div>
+                    <span class="badge bg-warning text-dark font-monospace mb-1" id="mTenNo">TENDER-NO</span>
+                    <h5 class="modal-title fw-bold mb-0" id="mTenTitle">Tender Title</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3 mb-4 p-3 bg-light rounded border small">
+                    <div class="col-sm-4">
+                        <span class="text-muted d-block">Procuring Division</span>
+                        <strong class="text-dark" id="mTenDiv">-</strong>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted d-block">Estimated Value</span>
+                        <strong class="text-success font-monospace" id="mTenVal">-</strong>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted d-block">Earnest Money Deposit (EMD)</span>
+                        <strong class="text-dark font-monospace" id="mTenEmd">-</strong>
+                    </div>
+                    <div class="col-sm-4 mt-2">
+                        <span class="text-muted d-block">Published Date</span>
+                        <span class="font-monospace" id="mTenPub">-</span>
+                    </div>
+                    <div class="col-sm-4 mt-2">
+                        <span class="text-muted d-block">Bid Submission Deadline</span>
+                        <span class="font-monospace text-danger fw-bold" id="mTenClose">-</span>
+                    </div>
+                    <div class="col-sm-4 mt-2">
+                        <span class="text-muted d-block">Supplier Clearance Class</span>
+                        <span class="badge bg-primary" id="mTenClass">-</span>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-file-earmark-text text-primary me-2"></i>Technical Specification & QA Requirement</h6>
+                <div class="p-3 bg-white border rounded font-monospace small mb-4" id="mTenSpec">
+                    Technical specifications...
+                </div>
+
+                <div class="p-3 bg-warning-subtle border border-warning rounded small text-dark mb-3">
+                    <i class="bi bi-shield-lock-fill text-warning me-1"></i>
+                    <strong>Submission Notice:</strong> Formal bid submissions require a Class-3 Digital Signature Certificate (DSC) and active AERB supplier empanelment. Unregistered vendors must complete physical document verification at the Rohini Central Procurement Cell.
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                <a href="{{ url_for('login') }}" class="btn btn-warning btn-sm fw-bold">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Contractor Bidding Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("tenderSearch");
+    const divBtns = document.querySelectorAll(".division-btn");
+    const rows = document.querySelectorAll(".tender-row");
+    const countBadge = document.getElementById("tenderCountBadge");
+    let currentDiv = "All";
+
+    function filterTenders() {
+        const query = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        rows.forEach(r => {
+            const div = r.getAttribute("data-div");
+            const title = r.getAttribute("data-title");
+            const tno = r.getAttribute("data-no");
+            const spec = r.getAttribute("data-spec");
+
+            const matchesDiv = (currentDiv === "All" || div === currentDiv);
+            const matchesQuery = (!query || title.includes(query) || tno.includes(query) || spec.includes(query));
+
+            if (matchesDiv && matchesQuery) {
+                r.style.display = "";
+                visibleCount++;
+            } else {
+                r.style.display = "none";
+            }
+        });
+
+        countBadge.innerText = `Showing ${visibleCount} Tenders`;
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", filterTenders);
+    }
+
+    divBtns.forEach(btn => {
+        btn.addEventListener("click", function () {
+            divBtns.forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+            currentDiv = this.getAttribute("data-div");
+            filterTenders();
+        });
+    });
+
+    document.querySelectorAll(".view-tender-btn").forEach(btn => {
+        btn.addEventListener("click", async function () {
+            const tno = this.getAttribute("data-tno");
+            try {
+                const res = await fetch(`/api/v1/tenders/${encodeURIComponent(tno)}`);
+                const data = await res.json();
+                if (data.status === "success") {
+                    const t = data.tender;
+                    document.getElementById("mTenNo").innerText = t.tender_no;
+                    document.getElementById("mTenTitle").innerText = t.title;
+                    document.getElementById("mTenDiv").innerText = t.division;
+                    document.getElementById("mTenVal").innerText = t.est_value;
+                    document.getElementById("mTenEmd").innerText = t.emd_amount;
+                    document.getElementById("mTenPub").innerText = t.published_date;
+                    document.getElementById("mTenClose").innerText = t.closing_date;
+                    document.getElementById("mTenClass").innerText = t.class_requirement;
+                    document.getElementById("mTenSpec").innerText = t.specifications;
+                    new bootstrap.Modal(document.getElementById("tenderDetailModal")).show();
+                }
+            } catch (err) {
+                console.error("Failed to load tender details", err);
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}
