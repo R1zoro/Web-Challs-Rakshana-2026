@@ -39,17 +39,28 @@
                     <tr>
                         <td class="fw-bold text-dark font-monospace">{{ ord.order_id }}</td>
                         <td><span class="badge bg-primary font-monospace">{{ ord.invoice_id }}</span></td>
-                        <td class="fw-semibold">{{ ord.item }}</td>
+                        <td class="fw-semibold">
+                            {{ ord.item }}
+                            {% if ord.docket_ref %}
+                            <div class="small font-monospace text-danger mt-1">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>Case Docket: <strong>{{ ord.docket_ref }}</strong>
+                            </div>
+                            {% endif %}
+                        </td>
                         <td>{{ ord.quantity }}</td>
                         <td>{{ ord.amount }}</td>
                         <td class="small text-muted">{{ ord.date }}</td>
                         <td>
+                            {% if "HELD" in ord.status %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">{{ ord.status }}</span>
+                            {% else %}
                             <span class="badge bg-secondary">{{ ord.status }}</span>
+                            {% endif %}
                         </td>
                         <td class="text-end">
-                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#invoiceModal">
-                                <i class="bi bi-file-earmark-pdf me-1"></i>View Invoice
-                            </button>
+                            <a href="{{ url_for('grievance') }}" class="btn btn-sm btn-outline-dark">
+                                <i class="bi bi-archive me-1"></i>Audit Docket
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}

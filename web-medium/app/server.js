@@ -2,6 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+const crypto = require('crypto');
 
 // Import rich institutional dataset (The Haystack)
 const {
@@ -16,7 +17,6 @@ const {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// The Secret Key leaked in diagnostic script (sign_key_hm4c in telemetry-core.chunk.js)
 const JWT_SECRET = process.env.JWT_SECRET || "M41T_NRF_Int3rn4l_JvvT_S3cr3t_!2026";
 const PRIVILEGED_ROLES = ["commander", "admin", "incident_commander", "employee", "operator"];
 
@@ -31,6 +31,7 @@ app.set('views', path.join(__dirname, 'views'));
 // Per-user prototype isolation shield: prevents cross-contestant contamination!
 // Each contestant (identified by their JWT subject) gets an isolated prototype context
 const userSessionPrototypes = new Map();
+const activeArmTickets = new Map();
 
 function getUserPrototype(userKey) {
     if (!userSessionPrototypes.has(userKey)) {
@@ -76,12 +77,12 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- VULNERABLE RECURSIVE MERGE SINK ---
-function deepMerge(target, source) {
+// Operator configuration deep extension utility
+function mergeConfig(target, source) {
     for (let key in source) {
         if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
             if (!target[key]) target[key] = {};
-            deepMerge(target[key], source[key]);
+            mergeConfig(target[key], source[key]);
         } else {
             target[key] = source[key];
         }
@@ -534,7 +535,44 @@ app.get('/dashboard', (req, res) => {
     });
 });
 
-// SCRAM Override Console (Locked Route)
+// =========================================================================
+// DECOY FACILITY MONITORING & DISPERSION APIS
+// =========================================================================
+app.get('/api/telemetry/nodes', (req, res) => {
+    res.json({
+        facility: "MAIT-NRF-SEC22",
+        status: "ACTIVE_DEGRADED",
+        nodes: [
+            { id: "NODE-N1", location: "Sector 22 Perimeter North", dose_uSv_h: 0.28, status: "NOMINAL" },
+            { id: "NODE-E2", location: "Outer Ring Road East Gate", dose_uSv_h: 0.31, status: "NOMINAL" },
+            { id: "NODE-S3", location: "Rohini Sector 23 Boundary", dose_uSv_h: 0.29, status: "NOMINAL" },
+            { id: "NODE-W4", location: "Civil Defense Muster Center", dose_uSv_h: 0.27, status: "NOMINAL" },
+            { id: "NODE-C0", location: "Reactor Containment Drywell", dose_uSv_h: 184.2, status: "ALARM_INTERLOCK" }
+        ]
+    });
+});
+
+app.get('/api/telemetry/radiation-levels', (req, res) => {
+    res.json({
+        survey_timestamp: new Date().toISOString(),
+        gamma_baseline: "0.24 uSv/h",
+        active_reading: "0.29 uSv/h",
+        airborne_particulate_cpm: 42,
+        tritium_scrubber_efficiency: "99.98%"
+    });
+});
+
+app.get('/api/facility/containment-status', (req, res) => {
+    res.json({
+        airlock_outer_seal: "ENGAGED",
+        airlock_inner_seal: "ENGAGED",
+        containment_pressure_kpa: 104.2,
+        decay_heat_bypass: "INTERLOCK_LATCHED_0x44",
+        ventilation_hepa_bank: "RECIRCULATION_MODE"
+    });
+});
+
+// SCRAM Interlock Override Console
 app.get('/reactor/scram/override', (req, res) => {
     if (!req.user) {
         return res.redirect('/login');
@@ -558,6 +596,69 @@ app.get('/reactor/scram/override', (req, res) => {
         });
     }
 
+    // Two-step stateful check: tokens satisfied -> Render Armed Interlock Console
+    res.render('scram_armed', {
+        user: req.user,
+        authorizedTokens: currentTokens
+    });
+});
+
+// STEP 1 of SCRAM: Arm Pneumatic Interlock & Issue One-Time Arming Ticket
+app.post('/api/scram/arm', (req, res) => {
+    if (!req.user || !res.locals.isPrivileged) {
+        return res.status(403).json({ status: "error", message: "Commander clearance required." });
+    }
+
+    const currentTokens = Number(req.userConfig.tokens);
+    if (!currentTokens || currentTokens < 1000) {
+        return res.status(403).json({
+            status: "error",
+            message: `Statutory safety quota unsatisfied. Active balance: ${currentTokens || 15}/1000.`
+        });
+    }
+
+    const userKey = (req.user && req.user.sub) || req.ip || 'anonymous';
+    const armTicket = crypto.randomBytes(16).toString('hex');
+    activeArmTickets.set(userKey, {
+        ticket: armTicket,
+        timestamp: Date.now()
+    });
+
+    res.json({
+        status: "ARMED",
+        arm_ticket: armTicket,
+        expires_in_seconds: 60,
+        message: "SCRAM Pneumatic Rod Interlocks Armed. Emergency trip authorization code issued."
+    });
+});
+
+// STEP 2 of SCRAM: Submit Armed Trip Authorization & Execute Physical Scram
+app.post('/reactor/scram/override', (req, res) => {
+    if (!req.user || !res.locals.isPrivileged) {
+        return res.status(403).render('error', {
+            code: 403,
+            title: "Access Denied: Unprivileged Role",
+            message: "Commander clearance required to execute SCRAM override."
+        });
+    }
+
+    const userKey = (req.user && req.user.sub) || req.ip || 'anonymous';
+    const ticketRecord = activeArmTickets.get(userKey);
+    const submittedTicket = req.body.arm_ticket || req.headers['x-arm-ticket'];
+
+    if (!submittedTicket || !ticketRecord || submittedTicket !== ticketRecord.ticket || (Date.now() - ticketRecord.timestamp > 60000)) {
+        return res.status(400).render('error', {
+            code: 400,
+            title: "Interlock Sequence Error",
+            message: "Missing, invalid, or expired SCRAM arming ticket. The safety manifold has reset."
+        });
+    }
+
+    // Consume ticket (single use)
+    activeArmTickets.delete(userKey);
+
+    const currentTokens = Number(req.userConfig.tokens) || 1000;
+
     // SUCCESS! Core Scrammed -> Reveals Flag and Hard challenge IP
     res.render('scram_success', {
         user: req.user,
@@ -567,9 +668,7 @@ app.get('/reactor/scram/override', (req, res) => {
     });
 });
 
-// =========================================================================
-// THE PROTOTYPE POLLUTION SINK
-// =========================================================================
+// Operator Terminal Preferences Handler
 app.post('/api/employee/preferences', (req, res) => {
     if (!req.user || !res.locals.isPrivileged) {
         return res.status(403).json({ status: "error", message: "Commander or Employee clearance required." });
@@ -580,13 +679,16 @@ app.post('/api/employee/preferences', (req, res) => {
     }
 
     try {
-        // Vulnerable recursive merge into session-scoped prototype target
-        deepMerge(req.userConfig, req.body);
+        mergeConfig(req.userConfig, req.body);
 
         res.json({
             status: "success",
-            message: "SCRAM Diagnostic thresholds & UI preferences updated successfully.",
-            current_tokens: req.userConfig.tokens
+            message: "Operator terminal preferences updated successfully.",
+            applied: {
+                theme: req.userConfig.theme || "institutional-light",
+                alertSound: req.userConfig.alertSound !== false,
+                refreshRate: req.userConfig.refreshRate || 3000
+            }
         });
     } catch (err) {
         res.status(500).json({ status: "error", message: "Failed to merge preferences." });

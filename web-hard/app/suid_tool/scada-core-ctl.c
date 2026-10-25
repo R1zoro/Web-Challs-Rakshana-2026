@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
         setresuid(0, 0, 0);
         setresgid(0, 0, 0);
         
-        // VULNERABILITY #3: PATH Hijack via relative command invocation
+        // Execute configuration backup via archive utility
         system("tar -czf /tmp/scada_recovery_snapshot.tar.gz /etc/kavach 2>/dev/null");
         printf("[+] SCADA diagnostic snapshot archived to /tmp/scada_recovery_snapshot.tar.gz\n");
         return 0;

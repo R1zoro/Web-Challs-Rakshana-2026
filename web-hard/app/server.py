@@ -298,7 +298,7 @@ def api_work_order_detail(order_id):
     return jsonify({"status": "success", "work_order": dict(row)})
 
 # =========================================================================
-# VULNERABILITY #1: REMOTE TELEMETRY DIAGNOSTIC PROBE (SSRF)
+# REMOTE TELEMETRY DIAGNOSTIC PROBE DISPATCHER
 # =========================================================================
 
 @app.route('/api/v1/scada/diagnostics/probe', methods=['POST'])

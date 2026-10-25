@@ -1,0 +1,101 @@
+<%- include('partials/header') %>
+
+<div class="container my-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="nrf-card p-5 border-top border-4 border-warning shadow-sm">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="p-3 bg-warning bg-opacity-10 rounded-circle text-warning">
+                            <i class="bi bi-shield-exclamation display-5"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-warning text-dark text-uppercase font-monospace mb-1">INTERLOCK CLEARED</span>
+                            <h3 class="fw-bold text-dark mb-0">Emergency Core SCRAM Console</h3>
+                        </div>
+                    </div>
+                    <span class="badge bg-light text-secondary border font-monospace px-3 py-2">
+                        AUTH BAL: <%= authorizedTokens %> TOKENS
+                    </span>
+                </div>
+
+                <p class="text-secondary mb-4">
+                    Statutory safety quotas satisfied (<%= authorizedTokens %> / 1,000 Safety Tokens). Pneumatic shut-off rod drive banks are unlocked. 
+                    Executing an emergency core scram requires arming the pneumatic drive manifold and submitting a hardware trip authorization ticket.
+                </p>
+
+                <div class="p-3 bg-light rounded border mb-4 font-monospace small">
+                    <div class="row g-2">
+                        <div class="col-6 text-muted">Active Operator:</div>
+                        <div class="col-6 text-end fw-bold text-dark"><%= user.sub %> (<%= user.role %>)</div>
+                        <div class="col-6 text-muted">Interlock State:</div>
+                        <div class="col-6 text-end fw-bold text-success">READY FOR ACTUATION</div>
+                        <div class="col-6 text-muted">Primary Coolant Loop:</div>
+                        <div class="col-6 text-end fw-bold text-danger">CV-201 RELIEF LATCHED</div>
+                    </div>
+                </div>
+
+                <div id="armAlert" class="alert alert-info d-none mb-4 py-2 px-3 small font-monospace"></div>
+
+                <div class="d-flex justify-content-between align-items-center pt-2">
+                    <a href="/dashboard" class="btn btn-outline-secondary px-4 fw-semibold">
+                        <i class="bi bi-arrow-left me-1"></i>Cancel & Return
+                    </a>
+                    <button id="btnExecuteScram" class="btn btn-danger px-4 py-2 fw-bold shadow">
+                        <i class="bi bi-radioactive me-2"></i>ACTUATE CORE SCRAM OVERRIDE
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('btnExecuteScram').addEventListener('click', async function () {
+    const btn = this;
+    const alertBox = document.getElementById('armAlert');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Arming Interlocks...';
+
+    try {
+        // Step 1: Arm SCRAM interlocks & retrieve single-use arm ticket
+        const armRes = await fetch('/api/scram/arm', { method: 'POST' });
+        const armData = await armRes.json();
+
+        if (armData.status !== 'ARMED' || !armData.arm_ticket) {
+            alertBox.className = 'alert alert-danger py-2 px-3 small font-monospace';
+            alertBox.innerText = 'Interlock Arming Fault: ' + (armData.message || 'Authorization rejected.');
+            alertBox.classList.remove('d-none');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-radioactive me-2"></i>ACTUATE CORE SCRAM OVERRIDE';
+            return;
+        }
+
+        alertBox.className = 'alert alert-warning py-2 px-3 small font-monospace';
+        alertBox.innerText = 'Manifold Armed. Ticket: ' + armData.arm_ticket + ' -> Tripping Pneumatic Banks...';
+        alertBox.classList.remove('d-none');
+
+        // Step 2: Submit stateful override with arm_ticket
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/reactor/scram/override';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'arm_ticket';
+        input.value = armData.arm_ticket;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    } catch (e) {
+        alertBox.className = 'alert alert-danger py-2 px-3 small font-monospace';
+        alertBox.innerText = 'Network Failure during actuation sequence.';
+        alertBox.classList.remove('d-none');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-radioactive me-2"></i>ACTUATE CORE SCRAM OVERRIDE';
+    }
+});
+</script>
+
+<%- include('partials/footer') %>

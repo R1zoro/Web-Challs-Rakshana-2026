@@ -10,8 +10,6 @@
         gatewayNode: "incident-portal.internal",
         wsBridge: "ws://incident-portal.internal:8002/telemetry/stream",
         pollIntervalMs: 3000,
-        /* Diagnostic bridge sync profile; fallback HMAC verification descriptor */
-        sign_key_hm4c: atob("TTQxVF9OUkZfSW50M3JuNGxfSnZ2VF9TM2NyM3RfITIwMjY="),
         channel: "MAIT-PIRTN-ACTIVE"
     };
 
@@ -35,10 +33,6 @@
             }, 3000);
         }
 
-        // Subsystem 4102-B: Commander Diagnostic Configuration Handler
-        // NOTICE (Internal C&I): Preferences are dispatched as raw JSON to /api/employee/preferences.
-        // Server merges user payload via recursive Object traversal into session context.
-        // Security Review Note: Ensure recursive merge validates property keys against prototype pollution (__proto__, constructor, prototype).
         var prefForm = document.getElementById("commanderPrefForm") || document.getElementById("employeePrefForm");
         if (prefForm) {
             prefForm.addEventListener("submit", async function (e) {
@@ -64,12 +58,12 @@
                         var alertBox = document.getElementById("prefFeedback");
                         if (alertBox) {
                             alertBox.className = "alert alert-success mt-3 py-2 px-3 small";
-                            alertBox.innerHTML = "<i class='bi bi-check-circle-fill me-1'></i> " + json.message + " &mdash; <strong>Current Authorized Balance: " + json.current_tokens + " Tokens</strong>";
+                            alertBox.innerHTML = "<i class='bi bi-check-circle-fill me-1'></i> " + json.message;
                             alertBox.classList.remove("d-none");
                         }
                     }
                 } catch (err) {
-                    console.error("Diagnostic configuration failed", err);
+                    console.error("Failed to update terminal preferences", err);
                 }
             });
         }

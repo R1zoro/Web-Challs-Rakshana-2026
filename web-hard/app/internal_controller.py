@@ -3,7 +3,7 @@
 MAIT-NRF Internal Safety Instrumented Controller (SIS-Core)
 Listens strictly on 127.0.0.1:9090 (Loopback only)
 Accessible only via internal network pivot / SSRF.
-Contains Vulnerability #2: Command Injection in /api/controller/firmware-verify
+Handles hardware telemetry, bus watchdog & firmware diagnostics.
 """
 
 from flask import Flask, request, jsonify
@@ -60,8 +60,7 @@ def firmware_verify():
     routine = request.args.get('routine') or data.get('routine') or request.form.get('routine') or 'decay_heat_recovery'
     checksum = request.args.get('checksum') or data.get('checksum') or request.form.get('checksum') or '0x8FA4'
 
-    # VULNERABILITY #2: Command Injection via shell command formatting
-    # The developer intended to run /opt/kavach/scripts/check_routine.sh
+    # Routine validation invokes parity check shell script
     cmd = f"/opt/kavach/scripts/check_routine.sh {routine} {checksum}"
     
     try:
