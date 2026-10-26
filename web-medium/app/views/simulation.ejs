@@ -1,0 +1,189 @@
+<%- include('partials/header') %>
+
+<!-- Simulation Hero Banner -->
+<div class="nrf-hero-banner py-4 border-bottom border-subtle">
+    <div class="container">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-white rounded-pill shadow-xs mb-2 text-primary small fw-semibold">
+            <i class="bi bi-cpu-fill text-warning"></i>
+            <span>C&amp;I OPERATIONAL SIMULATION SANDBOX &bull; SIL-3 CERTIFIED</span>
+        </div>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-sliders text-primary me-2"></i>Interactive Reactor Facility Simulation
+        </h2>
+        <p class="text-secondary small mb-0">
+            AERB operator training environment modeling real-time reactivity balance, primary coolant transport, and moderator flow. Adjust core operating components to observe simulated telemetry dynamics.
+        </p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Subsystem Controls Grid -->
+    <div class="row g-4 mb-4">
+
+        <!-- 1. Control Rods Adjustment (rod change) -->
+        <div class="col-lg-4">
+            <div class="nrf-card h-100 p-4 border-top border-4 border-primary d-flex flex-column">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="p-2 bg-primary-subtle text-primary rounded">
+                        <i class="bi bi-arrow-down-up fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">1. Control Rods</h5>
+                        <span class="small text-muted">Reactivity Suppression</span>
+                    </div>
+                </div>
+                <p class="small text-secondary flex-grow-1">
+                    Modulate boron carbide (B4C) control rod bank penetration depth to control neutron multiplication factor (k-eff).
+                </p>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-dark">Bank Insertion Level</label>
+                    <select id="rodSelect" class="form-select form-select-sm">
+                        <option value="15">15% Insertion (Critical Full Power)</option>
+                        <option value="35">35% Insertion (Intermediate Load Follow)</option>
+                        <option value="50" selected>50% Insertion (Reduced Thermal Output)</option>
+                        <option value="75">75% Insertion (Subcritical Hold)</option>
+                        <option value="100">100% Insertion (Full Shutdown)</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary fw-semibold w-100" onclick="runSimulation('control_rods')">
+                    <i class="bi bi-play-fill me-1"></i>Apply Rod Change
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. Heavy Water Moderator Adjustment (heavy water change) -->
+        <div class="col-lg-4">
+            <div class="nrf-card h-100 p-4 border-top border-4 border-info d-flex flex-column">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="p-2 bg-info-subtle text-info rounded">
+                        <i class="bi bi-droplet-half fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">2. Heavy Water</h5>
+                        <span class="small text-muted">D2O Moderator &amp; Coolant</span>
+                    </div>
+                </div>
+                <p class="small text-secondary flex-grow-1">
+                    Regulate primary heat transport heavy water circulation loop to maintain moderator temperature and PHT pressure equilibrium.
+                </p>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-dark">D2O Circulation Rate</label>
+                    <select id="heavyWaterSelect" class="form-select form-select-sm">
+                        <option value="380">380 kg/s (Reduced Recirculation Flow)</option>
+                        <option value="420" selected>420 kg/s (Rated Nominal Thermal Flow)</option>
+                        <option value="460">460 kg/s (Emergency Heat Removal Rate)</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-info fw-semibold w-100 text-dark" onclick="runSimulation('heavy_water')">
+                    <i class="bi bi-play-fill me-1"></i>Apply Heavy Water Change
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. Fuel Assembly Loading (fuel change) -->
+        <div class="col-lg-4">
+            <div class="nrf-card h-100 p-4 border-top border-4 border-warning d-flex flex-column">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="p-2 bg-warning-subtle text-warning-emphasis rounded">
+                        <i class="bi bi-box-seam fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">3. Fuel Channels</h5>
+                        <span class="small text-muted">Core Assembly Matrix</span>
+                    </div>
+                </div>
+                <p class="small text-secondary flex-grow-1">
+                    Configure nuclear fuel lattice enrichment profile to evaluate delayed neutron precursors and burnup coefficients.
+                </p>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-dark">Enrichment Profile</label>
+                    <select id="fuelSelect" class="form-select form-select-sm">
+                        <option value="LEU_3.2" selected>LEU 3.2% UO2 (Standard Core Lattice)</option>
+                        <option value="MOX_4.0">MOX 4.0% Pu-U (Recycled Mixed Oxide)</option>
+                        <option value="THORIUM_NAT">Natural Thorium-232 Blanket Matrix</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-warning text-dark fw-semibold w-100" onclick="runSimulation('fuel_assembly')">
+                    <i class="bi bi-play-fill me-1"></i>Apply Fuel Change
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Live Simulation Telemetry & Bus Diagnostic Console -->
+    <div class="nrf-card border-0 shadow-sm overflow-hidden">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success font-monospace" id="simStatusBadge">ONLINE</span>
+                <span class="fw-bold small font-monospace"><i class="bi bi-terminal me-1"></i>C&amp;I SIMULATION TELEMETRY &amp; BUS BUS DIAGNOSTIC LOG</span>
+            </div>
+            <span class="small text-muted font-monospace" id="simTimestamp">Ready for operator adjustment</span>
+        </div>
+        <div class="card-body bg-dark text-light p-4 font-monospace small" style="min-height: 220px; max-height: 380px; overflow-y: auto;" id="simConsoleOutput">
+<span class="text-secondary">[INFO] Reactor facility simulation digital twin initialized.</span>
+<span class="text-secondary">[INFO] Simulation parameters ready. Select any component above to trigger dynamic loop recalibration.</span>
+        </div>
+        <div class="card-footer bg-light small text-muted d-flex justify-content-between align-items-center py-2">
+            <span><i class="bi bi-shield-check text-success me-1"></i> AERB Safety Code SC/G-2 Compliant Digital Twin Sandbox</span>
+            <span class="font-monospace text-secondary">POST /api/v1/simulation/adjust</span>
+        </div>
+    </div>
+</div>
+
+<script>
+async function runSimulation(component) {
+    const consoleEl = document.getElementById("simConsoleOutput");
+    const badgeEl = document.getElementById("simStatusBadge");
+    const timeEl = document.getElementById("simTimestamp");
+
+    let val = "";
+    if (component === "control_rods") {
+        val = document.getElementById("rodSelect").value;
+    } else if (component === "heavy_water") {
+        val = document.getElementById("heavyWaterSelect").value;
+    } else if (component === "fuel_assembly") {
+        val = document.getElementById("fuelSelect").value;
+    }
+
+    badgeEl.className = "badge bg-warning text-dark font-monospace";
+    badgeEl.innerText = "CALIBRATING...";
+    timeEl.innerText = new Date().toLocaleTimeString();
+
+    try {
+        const res = await fetch("/api/v1/simulation/adjust", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                component: component,
+                setting: "auto",
+                value: val
+            })
+        });
+
+        const data = await res.json();
+        badgeEl.className = "badge bg-success font-monospace";
+        badgeEl.innerText = "SYNCHRONIZED";
+
+        const logEntry = document.createElement("div");
+        logEntry.className = "mt-3 pt-3 border-top border-secondary";
+        
+        let formattedJson = JSON.stringify(data, null, 2);
+        logEntry.innerHTML = `<span class="text-info fw-bold">[SIMULATION EVENT &bull; ${data.action}]</span>\n` +
+                             `<span class="text-success d-block my-1">${data.message}</span>\n` +
+                             `<pre class="text-light mb-0 mt-2 p-2 bg-black rounded border border-secondary" style="font-size: 0.82rem;">${formattedJson}</pre>`;
+        
+        consoleEl.appendChild(logEntry);
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+
+    } catch (err) {
+        console.error("Simulation request failed", err);
+        badgeEl.className = "badge bg-danger font-monospace";
+        badgeEl.innerText = "FAULT";
+    }
+}
+</script>
+
+<%- include('partials/footer') %>

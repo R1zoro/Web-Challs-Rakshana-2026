@@ -97,8 +97,8 @@
                 scheme: "HMAC",
                 algorithm: "HS256",
                 description: "Active C&I reactor telemetry interlock signing descriptor",
-                busSecret: "M41T_NRF_C&I_BUS_VERIFIER_KEY_2026",
-                tokenTTL: 3600
+                authMode: "DYNAMIC_HANDSHAKE_REQUIRED",
+                endpoint: "/api/v1/simulation/adjust"
             },
             modbusRtuBridge: {
                 scheme: "CRC16-IBM",

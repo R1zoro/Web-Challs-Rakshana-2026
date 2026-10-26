@@ -244,6 +244,14 @@ app.get('/notifications', (req, res) => {
     });
 });
 
+// 8. Dedicated Interactive Reactor Simulation Environment
+app.get('/simulation', (req, res) => {
+    res.render('simulation', {
+        user: req.user,
+        isPrivileged: res.locals.isPrivileged
+    });
+});
+
 // 8. Universal Search Results Page
 app.get('/search', (req, res) => {
     const q = (req.query.q || '').trim().toLowerCase();
@@ -304,6 +312,75 @@ app.get('/search', (req, res) => {
 // =========================================================================
 // UNIVERSAL APIS & DATA ENDPOINTS
 // =========================================================================
+
+// Interactive Reactor Simulation Parameter Adjustment API
+app.post('/api/v1/simulation/adjust', (req, res) => {
+    const { component, setting, value } = req.body || {};
+
+    if (!component) {
+        return res.status(400).json({ status: "error", message: "Component identifier required (control_rods, heavy_water, or fuel_assembly)." });
+    }
+
+    if (component === 'control_rods') {
+        const val = Number(value) || 45;
+        return res.json({
+            status: "success",
+            component: "control_rods",
+            action: "Pneumatic Control Rod Bank Insertion Adjusted",
+            applied_value: `${val}%`,
+            message: `Control rod bank insertion adjusted to ${val}%. Prompt neutron absorption increased across core lattice.`,
+            simulation_metrics: {
+                reactivity_delta_pcm: -Math.round(val * 2.8),
+                core_thermal_power_mwth: (20.0 - (val * 0.08)).toFixed(2),
+                neutron_flux_pct: (100.0 - (val * 0.35)).toFixed(1),
+                rod_bank_state: "LATCHED_INTERMEDIATE"
+            }
+        });
+    }
+
+    if (component === 'heavy_water') {
+        const val = Number(value) || 420;
+        return res.json({
+            status: "success",
+            component: "heavy_water",
+            action: "Heavy Water (D2O) Moderator & Coolant Loop Recalibrated",
+            applied_value: `${val} kg/s`,
+            message: `Primary Heavy Water (D2O) moderator circulation flow calibrated to ${val} kg/s. PHT loop pressure and thermal equilibrium synchronized.`,
+            simulation_metrics: {
+                moderator_level_pct: 99.8,
+                pht_coolant_pressure_bar: (138.0 + (val * 0.0033)).toFixed(1),
+                core_inlet_temp_c: 288.4,
+                core_outlet_temp_c: 342.1,
+                isotopic_purity: "99.82% D2O"
+            },
+            telemetry_sync: {
+                bus_status: "AUTHENTICATED",
+                telemetry_channel: "NRF-PHT-D2O-ACTIVE",
+                c_and_i_bus_key: "M41T_NRF_C&I_BUS_VERIFIER_KEY_2026",
+                sync_timestamp: new Date().toISOString()
+            }
+        });
+    }
+
+    if (component === 'fuel_assembly') {
+        const val = String(value || 'LEU_3.2');
+        return res.json({
+            status: "success",
+            component: "fuel_assembly",
+            action: "Fuel Channel Core Loading Reconfigured",
+            applied_value: val,
+            message: `Core fuel channel loading profile updated to [${val}]. Thermal neutron fission cross-section recalculated.`,
+            simulation_metrics: {
+                fuel_centerline_temp_c: 642.5,
+                delayed_neutron_fraction_beta: 0.0065,
+                burnup_mwd_t: 1420,
+                cladding_integrity: "100% NOMINAL"
+            }
+        });
+    }
+
+    return res.status(400).json({ status: "error", message: "Unknown simulation component." });
+});
 
 // Universal Search API
 app.get('/api/v1/search', (req, res) => {
