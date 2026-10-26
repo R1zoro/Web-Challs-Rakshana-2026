@@ -18,14 +18,14 @@
     <div class="scada-card p-3 mb-4">
         <div class="d-flex flex-wrap align-items-center gap-2">
             <span class="small text-light fw-bold me-2"><i class="bi bi-hdd-network text-cyan me-1"></i>Target Node Presets:</span>
-            <button type="button" class="btn btn-sm btn-scada-secondary" id="presetInternalController">
-                <i class="bi bi-shield-lock text-warning me-1"></i>Internal SIS Controller (127.0.0.2:9090)
+            <button type="button" class="btn btn-sm btn-scada-secondary" id="presetRTU01">
+                <i class="bi bi-hdd-network text-cyan me-1"></i>RTU-01 Plenum Header (10.0.5.41:502)
             </button>
-            <button type="button" class="btn btn-sm btn-scada-secondary" id="presetFirmwareVerify">
-                <i class="bi bi-cpu text-cyan me-1"></i>Firmware Verification Routine
+            <button type="button" class="btn btn-sm btn-scada-secondary" id="presetRTU02">
+                <i class="bi bi-hdd-network text-warning me-1"></i>RTU-02 PHT Coolant Loop (10.0.5.42:502)
             </button>
             <button type="button" class="btn btn-sm btn-scada-secondary" id="presetGateway">
-                <i class="bi bi-hdd-network text-primary me-1"></i>SCADA Gateway (10.0.5.42:5000)
+                <i class="bi bi-hdd-network text-primary me-1"></i>SCADA Gateway Core (10.0.5.75:5000)
             </button>
         </div>
     </div>
@@ -39,8 +39,8 @@
                 </div>
 
                 <p class="small text-light mb-3">
-                    Transmit low-level diagnostic telemetry queries to field RTU gateways or internal controller supervisory endpoints. 
-                    Used by Control & Instrumentation engineers to clear latched safety trips and test controller firmware routines.
+                    Transmit low-level diagnostic telemetry queries to field RTU gateways or internal supervisory nodes. 
+                    Used by Control & Instrumentation engineers to clear latched safety trips and test subsystem routines.
                 </p>
 
                 <form id="probeForm" class="flex-grow-1 d-flex flex-column">
@@ -48,11 +48,11 @@
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-white mb-1">Diagnostic Function / Routine</label>
                         <select id="routineSelect" class="form-select bg-dark border-secondary text-white font-monospace">
-                            <option value="firmware_verify" selected>Firmware Parity & CRC Verification (/api/controller/firmware-verify)</option>
-                            <option value="sis_status">Hardware Watchdog & Trip Relays (/api/controller/status)</option>
-                            <option value="sis_root">Controller Root Specification (/)</option>
-                            <option value="scada_overview">SCADA Gateway Overview (/api/v1/scada/overview)</option>
-                            <option value="custom">Custom Protocol Endpoint URL</option>
+                            <option value="scada_overview" selected>SCADA Gateway Overview (/api/v1/scada/overview)</option>
+                            <option value="scada_alarms">Alarms Historian Snapshot (/api/v1/scada/alarms?limit=10)</option>
+                            <option value="scada_registers">Holding Registers Cache (/api/v1/scada/registers?block=BLOCK_1)</option>
+                            <option value="root_ping">Root Diagnostic Heartbeat (/)</option>
+                            <option value="custom">Custom Protocol Endpoint URL &amp; Path</option>
                         </select>
                     </div>
 
@@ -61,33 +61,24 @@
                         <label class="form-label small fw-bold text-white mb-1">Target Controller Endpoint Address</label>
                         <div class="input-group">
                             <span class="input-group-text bg-dark border-secondary text-cyan font-monospace small fw-bold">HOST</span>
-                            <input type="text" id="probeHost" class="form-control bg-dark border-secondary text-white font-monospace" value="127.0.0.2:9090" required>
+                            <input type="text" id="probeHost" class="form-control bg-dark border-secondary text-white font-monospace" value="10.0.5.75:5000" placeholder="e.g. 10.0.5.41:502 or 10.0.5.75:5000" required>
                         </div>
                         <div class="small text-light mt-1">
-                            <i class="bi bi-info-circle text-cyan me-1"></i> Enter target IP/hostname and port (e.g. internal SIS controller on loopback port 9090).
+                            <i class="bi bi-info-circle text-cyan me-1"></i> Enter target SCADA IP address or hostname and port (e.g. 10.0.5.75:5000 or custom diagnostic address).
                         </div>
                     </div>
 
-                    <!-- Routine Parameters (Routine Name & Checksum) -->
-                    <div id="routineParamsSection" class="p-3 bg-dark rounded border border-secondary mb-3">
-                        <span class="small text-warning fw-bold d-block mb-2"><i class="bi bi-sliders me-1"></i>Firmware Verification Routine Parameters:</span>
-                        <div class="row g-2">
-                            <div class="col-sm-7">
-                                <label class="form-label small text-light mb-1">Routine Identifier</label>
-                                <input type="text" id="paramRoutine" class="form-control bg-dark border-secondary text-white font-monospace small" value="decay_heat_recovery" placeholder="e.g. decay_heat_recovery">
-                            </div>
-                            <div class="col-sm-5">
-                                <label class="form-label small text-light mb-1">CRC Checksum</label>
-                                <input type="text" id="paramChecksum" class="form-control bg-dark border-secondary text-white font-monospace small" value="0x8FA4" placeholder="e.g. 0x8FA4">
-                            </div>
-                        </div>
+                    <!-- Custom Endpoint Path Section -->
+                    <div id="customPathSection" class="p-3 bg-dark rounded border border-secondary mb-3" style="display: none;">
+                        <label class="form-label small text-warning fw-bold mb-1"><i class="bi bi-signpost-split me-1"></i>Custom Endpoint Path &amp; Parameters:</label>
+                        <input type="text" id="customPathInput" class="form-control bg-dark border-secondary text-white font-monospace small" placeholder="/path?param=value (e.g. /api/controller/...)">
                     </div>
 
                     <!-- Live Dispatch URL Preview -->
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-white mb-1">Dispatched Request String</label>
                         <div class="p-2 bg-dark rounded border border-secondary font-monospace small text-cyan user-select-all" id="dispatchPreview">
-                            http://127.0.0.2:9090/api/controller/firmware-verify?routine=decay_heat_recovery&checksum=0x8FA4
+                            http://10.0.5.75:5000/api/v1/scada/overview
                         </div>
                     </div>
 
@@ -96,7 +87,7 @@
                         <div class="accordion-item bg-dark border-secondary">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed bg-dark text-light font-monospace small py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdvanced">
-                                    <i class="bi bi-gear-fill text-cyan me-2"></i>Advanced Network & Protocol Flags
+                                    <i class="bi bi-gear-fill text-cyan me-2"></i>Advanced Network &amp; Protocol Flags
                                 </button>
                             </h2>
                             <div id="collapseAdvanced" class="accordion-collapse collapse" data-bs-parent="#advancedAccordion">
@@ -124,8 +115,8 @@
                     </div>
 
                     <div class="p-2 bg-dark rounded border border-secondary mb-3 small text-light">
-                        <strong class="text-warning d-block mb-1"><i class="bi bi-shield-lock-fill me-1"></i>AERB Security Notice:</strong>
-                        Direct probing of <code>localhost</code> / <code>127.0.0.1</code> addresses is blocked by security policy AERB-OT-SEC-901. Field node or alternate address dispatch is permitted.
+                        <strong class="text-warning d-block mb-1"><i class="bi bi-shield-lock-fill me-1"></i>AERB Security Policy:</strong>
+                        All remote diagnostic telemetry requests are subject to Section 9 of the AERB OT Cyber Isolation Directive.
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center mt-auto">
@@ -173,9 +164,8 @@ Select a diagnostic routine and click "Execute Diagnostic Routine".
 document.addEventListener("DOMContentLoaded", function () {
     const routineSelect = document.getElementById("routineSelect");
     const hostInput = document.getElementById("probeHost");
-    const routineInput = document.getElementById("paramRoutine");
-    const checksumInput = document.getElementById("paramChecksum");
-    const routineParamsSection = document.getElementById("routineParamsSection");
+    const customPathSection = document.getElementById("customPathSection");
+    const customPathInput = document.getElementById("customPathInput");
     const dispatchPreview = document.getElementById("dispatchPreview");
     const methodSelect = document.getElementById("probeMethod");
     const timeoutInput = document.getElementById("probeTimeout");
@@ -200,22 +190,28 @@ document.addEventListener("DOMContentLoaded", function () {
         const routineType = routineSelect.value;
         let url = '';
 
-        if (routineType === 'firmware_verify') {
-            routineParamsSection.style.display = 'block';
-            const r = encodeURIComponent(routineInput.value.trim());
-            const c = encodeURIComponent(checksumInput.value.trim());
-            url = `${host}/api/controller/firmware-verify?routine=${routineInput.value.trim()}&checksum=${checksumInput.value.trim()}`;
-        } else if (routineType === 'sis_status') {
-            routineParamsSection.style.display = 'none';
-            url = `${host}/api/controller/status`;
-        } else if (routineType === 'sis_root') {
-            routineParamsSection.style.display = 'none';
-            url = `${host}/`;
-        } else if (routineType === 'scada_overview') {
-            routineParamsSection.style.display = 'none';
+        if (routineType === 'scada_overview') {
+            customPathSection.style.display = 'none';
             url = `${host}/api/v1/scada/overview`;
+        } else if (routineType === 'scada_alarms') {
+            customPathSection.style.display = 'none';
+            url = `${host}/api/v1/scada/alarms?limit=10`;
+        } else if (routineType === 'scada_registers') {
+            customPathSection.style.display = 'none';
+            url = `${host}/api/v1/scada/registers?block=BLOCK_1`;
+        } else if (routineType === 'root_ping') {
+            customPathSection.style.display = 'none';
+            url = `${host}/`;
+        } else if (routineType === 'custom') {
+            customPathSection.style.display = 'block';
+            let path = customPathInput.value.trim();
+            if (path) {
+                url = `${host}${path.startsWith('/') ? '' : '/'}${path}`;
+            } else {
+                url = host;
+            }
         } else {
-            routineParamsSection.style.display = 'none';
+            customPathSection.style.display = 'none';
             url = host;
         }
 
@@ -225,35 +221,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
     routineSelect.addEventListener('change', updatePreview);
     hostInput.addEventListener('input', updatePreview);
-    routineInput.addEventListener('input', updatePreview);
-    checksumInput.addEventListener('input', updatePreview);
+    if (customPathInput) customPathInput.addEventListener('input', updatePreview);
 
     // Presets
-    document.getElementById("presetInternalController").addEventListener("click", function () {
-        hostInput.value = "127.0.0.2:9090";
-        routineSelect.value = "sis_root";
+    document.getElementById("presetRTU01").addEventListener("click", function () {
+        hostInput.value = "10.0.5.41:502";
+        routineSelect.value = "root_ping";
         updatePreview();
     });
 
-    document.getElementById("presetFirmwareVerify").addEventListener("click", function () {
-        hostInput.value = "127.0.0.2:9090";
-        routineSelect.value = "firmware_verify";
-        routineInput.value = "decay_heat_recovery";
-        checksumInput.value = "0x8FA4";
+    document.getElementById("presetRTU02").addEventListener("click", function () {
+        hostInput.value = "10.0.5.42:502";
+        routineSelect.value = "root_ping";
         updatePreview();
     });
 
     document.getElementById("presetGateway").addEventListener("click", function () {
-        hostInput.value = "10.0.5.42:5000";
+        hostInput.value = "10.0.5.75:5000";
         routineSelect.value = "scada_overview";
         updatePreview();
     });
 
     document.getElementById("clearFormBtn").addEventListener("click", function () {
-        hostInput.value = "127.0.0.2:9090";
-        routineSelect.value = "firmware_verify";
-        routineInput.value = "decay_heat_recovery";
-        checksumInput.value = "0x8FA4";
+        hostInput.value = "10.0.5.75:5000";
+        routineSelect.value = "scada_overview";
+        if (customPathInput) customPathInput.value = "";
         payloadInput.value = "";
         updatePreview();
     });

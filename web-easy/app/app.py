@@ -366,7 +366,7 @@ def login():
             session['name'] = USERS[username]['name']
             session['org'] = USERS[username]['org']
             session['role'] = USERS[username]['role']
-            return redirect(url_for('orders'))
+            return redirect(url_for('home'))
         else:
             return render_template('login.html', error="Invalid clearance credentials or empanelment expired.")
             

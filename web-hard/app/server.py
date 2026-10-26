@@ -66,6 +66,9 @@ def gate_submit():
     if not email or '@' not in email or '.' not in email.split('@')[-1]:
         return redirect(url_for('gate', error="Please provide a valid email address.", next=next_url))
 
+    if not next_url or next_url in ['/gate', '/gate/submit', '/']:
+        next_url = '/scada/overview'
+
     resp = redirect(next_url)
     resp.set_cookie('Web_Chall_cookie', email, max_age=604800, samesite='Lax')
     return resp

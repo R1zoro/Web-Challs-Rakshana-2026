@@ -85,7 +85,7 @@ app.use((req, res, next) => {
 
 // Gate Routes
 app.get('/gate', (req, res) => {
-    const nextUrl = req.query.next || '/';
+    const nextUrl = req.query.next || '/telemetry';
     const currentEmail = req.cookies.Web_Chall_cookie || '';
     const error = req.query.error || '';
     res.render('gate', { nextUrl, currentEmail, error });
@@ -93,7 +93,7 @@ app.get('/gate', (req, res) => {
 
 app.post('/gate/submit', (req, res) => {
     const email = (req.body.email || '').trim();
-    const nextUrl = req.body.next || '/';
+    const nextUrl = req.body.next || '/telemetry';
     if (!email || !email.includes('@') || !email.split('@')[1] || !email.split('@')[1].includes('.')) {
         return res.redirect(`/gate?error=${encodeURIComponent('Please provide a valid email address.')}&next=${encodeURIComponent(nextUrl)}`);
     }
@@ -699,7 +699,7 @@ app.post('/login', (req, res) => {
         }, JWT_SECRET, { expiresIn: '12h' });
 
         res.cookie('nrf_token', token, { httpOnly: true, maxAge: 12 * 3600 * 1000 });
-        return res.redirect('/dashboard');
+        return res.redirect('/telemetry');
     }
 
     // Normal staff login form (for candidates testing credentials or after forging)
@@ -712,7 +712,7 @@ app.post('/login', (req, res) => {
         }, JWT_SECRET, { expiresIn: '12h' });
 
         res.cookie('nrf_token', token, { httpOnly: true, maxAge: 12 * 3600 * 1000 });
-        return res.redirect('/dashboard');
+        return res.redirect('/telemetry');
     }
 
     return res.render('login', { user: null, error: "Invalid staff authorization credentials. Use 'Continue as Public Observer' for transparency access." });
