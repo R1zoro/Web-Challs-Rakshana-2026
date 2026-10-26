@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         try {
-            var res = await fetch("/api/grievance/view?docket=" + encodeURIComponent(ticketId), {
+            var res = await fetch("/api/grievance/view?id=" + encodeURIComponent(ticketId), {
                 headers: {
                     "X-Client-Timestamp": ts.toString(),
                     "X-Client-Nonce": nonce.toString()
@@ -60,15 +60,4 @@ document.addEventListener("DOMContentLoaded", function () {
             fetchDocketDossier(ticketId);
         });
     });
-
-    var queryForm = document.getElementById("docketQueryForm");
-    if (queryForm) {
-        queryForm.addEventListener("submit", function (e) {
-            e.preventDefault();
-            var input = document.getElementById("queryDocketInput");
-            if (input && input.value.trim()) {
-                fetchDocketDossier(input.value.trim());
-            }
-        });
-    }
 });

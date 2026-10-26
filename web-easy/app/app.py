@@ -64,10 +64,9 @@ INVOICES = {
         "amount": "₹ 4,82,000",
         "tax": "₹ 86,760 (GST @ 18%)",
         "grand_total": "₹ 5,68,760",
-        "status": "Delivered - Partial Defects Reported",
+        "status": "Delivered - Quality Non-Conformance Logged",
         "shipping_address": "QA Inspection Bay 4, Adit Heavy Valves, Industrial Estate, Okhla Phase III, New Delhi",
-        "ticket_id": "DISP-2026-1049",
-        "docket_ref": "DISP-2026-1049"
+        "notes": "Consignment received with inspection non-conformance. Case #401 logged."
     },
     "ORD-2026-4402": {
         "order_id": "ORD-2026-4402",
@@ -80,11 +79,9 @@ INVOICES = {
         "amount": "₹ 3,85,00,000",
         "tax": "₹ 69,30,000 (GST @ 18%)",
         "grand_total": "₹ 4,54,30,000",
-        "status": "HELD - Central Safety Cell Review",
+        "status": "HELD - Regulatory Safety Quarantine",
         "shipping_address": "Reactivity Control Laboratory, MAIT Nuclear Research Facility, Sector 22, Rohini",
-        "ticket_id": "DISP-2026-0414",
-        "docket_ref": "DISP-2026-0414",
-        "notes": "Emergency consignment held pending Dr. Arun Sharma safety verification. Linked Docket: DISP-2026-0414."
+        "notes": "Emergency transit consignment held under AERB Section 12 Quality Protocol."
     }
 }
 
@@ -131,10 +128,23 @@ CATALOG = [
     }
 ]
 
-# Central Logistics Discrepancy & Grievance Case Registry
+# Central Logistics Discrepancy & Grievance Case Registry (Indexed 401..420)
 TICKETS = {
-    "DISP-2026-0102": {
-        "id": "DISP-2026-0102",
+    401: {
+        "id": 401,
+        "author": "Vikram Adit (QA Inspector)",
+        "author_user": "contractor_testing",
+        "department": "Adit Precision Valves / External QA Contractor",
+        "invoice_ref": "INV-2026-8812",
+        "subject": "Micro-abrasions observed on outer flange seal delivery",
+        "date": "2026-10-18 10:30 IST",
+        "priority": "Medium",
+        "status": "Resolved - Credit Note Dispatched",
+        "body": "During receipt inspection of Invoice INV-2026-8812, batch #441 showed surface abrasions on 3 out of 24 units. Replacement seals requested.",
+        "resolution": "RMA approved. Replacement batch cleared by M-AMCEL metallurgical lab."
+    },
+    402: {
+        "id": 402,
         "author": "R. K. Mishra (Materials Inspector)",
         "department": "Narora Atomic Power Station - Unit 2",
         "invoice_ref": "INV-NAPS-LD-041",
@@ -145,8 +155,8 @@ TICKETS = {
         "body": "Batch #12 lead interlocking blocks showed a 0.8mm edge bevel deviation. Re-machined onsite under vendor supervision.",
         "resolution": "QA deviation report accepted by NAPS site engineer."
     },
-    "DISP-2026-0118": {
-        "id": "DISP-2026-0118",
+    403: {
+        "id": 403,
         "author": "G. Venkatesh (Operations Sup.)",
         "department": "Kaiga Generating Station - Primary Heat Transport",
         "invoice_ref": "INV-KGS-VALVE-902",
@@ -157,8 +167,8 @@ TICKETS = {
         "body": "During cold hydrostatic testing, valve spindle gland showed 4 drops/min seepage at 110 kg/cm2 pressure.",
         "resolution": "Vendor dispatched specialist retrofit kit. Gland repacked with graphite foil ring."
     },
-    "DISP-2026-0145": {
-        "id": "DISP-2026-0145",
+    404: {
+        "id": 404,
         "author": "Dr. Meenakshi S. (Radiochemistry)",
         "department": "BARC Materials Science Division, Trombay",
         "invoice_ref": "INV-BARC-ZR-889",
@@ -169,8 +179,21 @@ TICKETS = {
         "body": "Zircaloy cladding shipment arrived safely. We need the verified Hafnium impurity ppm breakdown for archive.",
         "resolution": "ICP-MS certificate transmitted via secure courier."
     },
-    "DISP-2026-0182": {
-        "id": "DISP-2026-0182",
+    405: {
+        "id": 405,
+        "author": "Vikram Adit (QA Inspector)",
+        "author_user": "contractor_testing",
+        "department": "Adit Precision Valves / External QA Contractor",
+        "invoice_ref": "INV-2026-8812",
+        "subject": "Batch calibration certificate missing for primary weld coupons",
+        "date": "2026-10-18 14:15 IST",
+        "priority": "Low",
+        "status": "Resolved - Certificate Attached",
+        "body": "Initial consignment received on 12-Oct was missing Annexure B metallurgical certificate. Vendor provided signed copy upon follow-up.",
+        "resolution": "Annexure B uploaded to procurement portal archive."
+    },
+    406: {
+        "id": 406,
         "author": "H. P. Patel (Maintenance Head)",
         "department": "Kakrapar Atomic Power Project - Unit 3",
         "invoice_ref": "INV-KAPP-D2O-114",
@@ -181,8 +204,8 @@ TICKETS = {
         "body": "Drum #07 tamper-proof seal arrived with an unreadable barcode. Re-verification required.",
         "resolution": "Physical seal serial number cross-referenced with AERB consignment manifest."
     },
-    "DISP-2026-0205": {
-        "id": "DISP-2026-0205",
+    407: {
+        "id": 407,
         "author": "D. Roy (Fuel Handling Section)",
         "department": "Tarapur Atomic Power Station",
         "invoice_ref": "INV-TAPS-GRP-331",
@@ -193,8 +216,8 @@ TICKETS = {
         "body": "Delivery invoice listed batch GR-402, but shipping pallet tag indicated GR-403.",
         "resolution": "Typographical error on vendor dispatch desk corrected. Certificate reissued."
     },
-    "DISP-2026-0219": {
-        "id": "DISP-2026-0219",
+    408: {
+        "id": 408,
         "author": "A. K. Subramanian",
         "department": "Kudankulam Nuclear Power Plant - Unit 2",
         "invoice_ref": "INV-KKNPP-TITAN-701",
@@ -205,8 +228,8 @@ TICKETS = {
         "body": "Intergranular corrosion test coupons required for recent secondary circuit piping consignment.",
         "resolution": "Mill test coupons dispatched with ultrasonic examination documentation."
     },
-    "DISP-2026-0244": {
-        "id": "DISP-2026-0244",
+    409: {
+        "id": 409,
         "author": "S. Chouhan (Instrument Control)",
         "department": "Rajasthan Atomic Power Station (RAPS), Rawatbhata",
         "invoice_ref": "INV-RAPS-SEAL-552",
@@ -217,8 +240,8 @@ TICKETS = {
         "body": "Cure date on ethylene propylene diene monomer (EPDM) seals was missing from inner blister packet.",
         "resolution": "OEM cure date verified as Q3-2026 with 5-year rated shelf life."
     },
-    "DISP-2026-0278": {
-        "id": "DISP-2026-0278",
+    410: {
+        "id": 410,
         "author": "Devinder Singh (Procurement Exec)",
         "department": "Gorakhpur Haryana Anu Vidyut Pariyojana (GHAVP)",
         "invoice_ref": "INV-GHAVP-SEN-220",
@@ -229,8 +252,8 @@ TICKETS = {
         "body": "Consignment delayed by 48 hours at Haryana interstate checkpost.",
         "resolution": "Priority green corridor transit clearance issued. Consignment received."
     },
-    "DISP-2026-0301": {
-        "id": "DISP-2026-0301",
+    411: {
+        "id": 411,
         "author": "T. Balakrishnan (NDT Lead)",
         "department": "Madras Atomic Power Station (MAPS), Kalpakkam",
         "invoice_ref": "INV-MAPS-ZR-104",
@@ -241,8 +264,8 @@ TICKETS = {
         "body": "Spool #09 demonstrated 3% echo amplitude variation on calibration standard notch.",
         "resolution": "Re-scanned at NFC Hyderabad inspection lab. Echo verified within ASTM B811 permissible tolerance."
     },
-    "DISP-2026-0331": {
-        "id": "DISP-2026-0331",
+    412: {
+        "id": 412,
         "author": "M. K. Joshi (Logistics Desk)",
         "department": "Heavy Water Board - Kota Plant",
         "invoice_ref": "INV-HWB-KOTA-404",
@@ -253,8 +276,20 @@ TICKETS = {
         "body": "Gross weighbridge reading showed 140 kg variance compared to Kota dispatch ticket.",
         "resolution": "Tare scale recalibrated. Net heavy water mass verified against drum ullage measurements."
     },
-    "DISP-2026-0414": {
-        "id": "DISP-2026-0414",
+    413: {
+        "id": 413,
+        "author": "S. R. Kulkarni (Quality Cell)",
+        "department": "L&T Heavy Engineering Hazira Works",
+        "invoice_ref": "INV-LT-RUPT-082",
+        "subject": "Primary loop rupture disc burst pressure certification",
+        "date": "2026-10-18 11:20 IST",
+        "priority": "Medium",
+        "status": "Closed",
+        "body": "Batch test certificate for Inconel rupture disc lot #883 missing ASME Section III stamp.",
+        "resolution": "Authorized Nuclear Inspector (ANI) re-endorsed test certificate."
+    },
+    414: {
+        "id": 414,
         "author": "Dr. Arun Sharma (Lead Reactor Safety Operations)",
         "department": "MAIT Nuclear Research Facility (MAIT-NRF)",
         "invoice_ref": "INV-MNRF-BORON-EMERGENCY",
@@ -274,20 +309,8 @@ TICKETS = {
         ),
         "resolution": "Ticket locked and flagged for deletion by M-AMCEL Information Security Officer."
     },
-    "DISP-2026-0465": {
-        "id": "DISP-2026-0465",
-        "author": "S. R. Kulkarni (Quality Cell)",
-        "department": "L&T Heavy Engineering Hazira Works",
-        "invoice_ref": "INV-LT-RUPT-082",
-        "subject": "Primary loop rupture disc burst pressure certification",
-        "date": "2026-10-18 11:20 IST",
-        "priority": "Medium",
-        "status": "Closed",
-        "body": "Batch test certificate for Inconel rupture disc lot #883 missing ASME Section III stamp.",
-        "resolution": "Authorized Nuclear Inspector (ANI) re-endorsed test certificate."
-    },
-    "DISP-2026-0502": {
-        "id": "DISP-2026-0502",
+    415: {
+        "id": 415,
         "author": "B. N. Rao (Reactor Engineering)",
         "department": "Nuclear Fuel Complex (NFC), Hyderabad",
         "invoice_ref": "INV-NFC-TUBE-551",
@@ -297,27 +320,12 @@ TICKETS = {
         "status": "Resolved",
         "body": "Spring relaxation testing at 300 deg C required for fuel channel spacer ring batch.",
         "resolution": "Hot mechanical testing data uploaded to M-AMCEL technical portal."
-    },
-    "DISP-2026-1049": {
-        "id": "DISP-2026-1049",
-        "author": "Vikram Adit (QA Inspector)",
-        "author_user": "contractor_testing",
-        "department": "Adit Precision Valves / External QA Contractor",
-        "invoice_ref": "INV-2026-8812",
-        "subject": "Micro-abrasions observed on outer flange seal delivery",
-        "date": "2026-10-18 10:30 IST",
-        "priority": "Medium",
-        "status": "Resolved - Credit Note Dispatched",
-        "body": "During receipt inspection of Invoice INV-2026-8812, batch #441 showed surface abrasions on 3 out of 24 units. Replacement seals requested.",
-        "resolution": "RMA approved. Replacement batch cleared by M-AMCEL metallurgical lab."
     }
 }
 
-# Numerical aliases for backward compatibility
-TICKETS[4] = TICKETS["DISP-2026-0414"]
-TICKETS[10] = TICKETS["DISP-2026-1049"]
-TICKETS[1] = TICKETS["DISP-2026-0102"]
-TICKETS[2] = TICKETS["DISP-2026-0118"]
+# Duplicate string keys for flexible lookup
+for k in list(TICKETS.keys()):
+    TICKETS[str(k)] = TICKETS[k]
 
 
 @app.route('/gate', methods=['GET'])
@@ -371,7 +379,8 @@ def logout():
 
 @app.route('/tenders')
 def tenders_page():
-    return render_template('tenders.html', user=session, tenders=TENDERS)
+    divisions = sorted(list(set(t['division'] for t in TENDERS)))
+    return render_template('tenders.html', user=session, tenders=TENDERS, divisions=divisions)
 
 tenders = tenders_page
 
@@ -389,7 +398,7 @@ vendors = vendors_page
 
 @app.route('/materials')
 def materials():
-    return render_template('materials.html', user=session, materials=CATALOG)
+    return render_template('materials.html', user=session, catalog=CATALOG, materials=CATALOG)
 
 @app.route('/search')
 def search_page():
@@ -440,10 +449,10 @@ def grievance():
             "message": f"Discrepancy for invoice [{inv}] ('{subject}') submitted. Quality Cell SLA response window is 48 business hours."
         }
 
-    user_tickets = [t for t in TICKETS.values() if t.get('author_user') == session.get('user') or t['id'] == "DISP-2026-1049"]
+    user_tickets = [t for k, t in TICKETS.items() if isinstance(k, int) and t.get('author_user') == session.get('user')]
     return render_template('grievance.html', user=session, tickets=user_tickets, notice=submission_notice)
 
-# Central Logistics Discrepancy Case Viewer API
+# Central Logistics Discrepancy Case Viewer API (Vulnerable to IDOR)
 @app.route('/api/grievance/view', methods=['GET'])
 def get_grievance():
     if 'user' not in session:
@@ -485,23 +494,25 @@ def get_grievance():
             "message": "Malformed integrity payload format."
         }), 400
 
-    query_id = request.args.get('docket') or request.args.get('id') or request.args.get('case_id') or ''
+    query_id = request.args.get('id') or request.args.get('docket') or request.args.get('case_id') or ''
     query_id = str(query_id).strip()
 
-    ticket = TICKETS.get(query_id)
-    if not ticket:
-        try:
-            num_id = int(query_id)
-            ticket = TICKETS.get(num_id)
-        except ValueError:
-            pass
+    try:
+        num_id = int(query_id)
+    except (ValueError, TypeError):
+        return jsonify({"status": "error", "message": "Invalid docket identifier format. Numerical registry index required."}), 400
 
+    # Strict application-level range bounding to prevent automated scanning outside active docket index
+    if num_id < 400 or num_id > 425:
+        return jsonify({"status": "error", "message": "Dossier record out of active archive index range."}), 404
+
+    ticket = TICKETS.get(num_id)
     if not ticket:
         return jsonify({"status": "error", "message": "Case docket not found in central registry."}), 404
 
-    # Dynamically inject personalized flag for DISP-2026-0414 based on Web_Chall_cookie
+    # Dynamically inject personalized flag for ticket #414 based on Web_Chall_cookie
     response_ticket = dict(ticket)
-    if str(query_id) in ["DISP-2026-0414", "4"]:
+    if num_id == 414:
         user_email = request.cookies.get('Web_Chall_cookie', '')
         dynamic_flag = make_participant_web_flag(user_email, "easy")
         response_ticket['body'] = re.sub(r'RAKSHNA\{[^\}]+\}', dynamic_flag, response_ticket['body'])
@@ -514,6 +525,20 @@ def get_grievance():
 # =========================================================================
 # REALISTIC DECOY APIS (ENTERPRISE SUPPLY CHAIN HAYSTACK)
 # =========================================================================
+@app.route('/api/v1/tenders/<tender_no>', methods=['GET'])
+def api_tender_detail(tender_no):
+    tender = next((t for t in TENDERS if t['tender_no'].upper() == tender_no.upper()), None)
+    if not tender:
+        return jsonify({"status": "error", "message": "Tender notice not found."}), 404
+    return jsonify({"status": "success", "tender": tender})
+
+@app.route('/api/v1/circulars/<path:ref>', methods=['GET'])
+def api_circular_detail(ref):
+    circular = next((c for c in CIRCULARS if c['ref'].upper() == ref.upper()), None)
+    if not circular:
+        return jsonify({"status": "error", "message": "Circular directive not found."}), 404
+    return jsonify({"status": "success", "circular": circular})
+
 @app.route('/api/v1/orders/track', methods=['GET'])
 def api_track_order():
     order_ref = request.args.get('order_ref', 'PO-MAMCEL-2026-EMG-041')
@@ -523,11 +548,11 @@ def api_track_order():
         "consignee": "MAIT Nuclear Research Facility - Sector 22, Rohini",
         "security_escort": "CISF Armed Transit Convoy Unit #4",
         "transit_status": "HELD_AT_CHECKPOST",
-        "linked_dockets": ["DISP-2026-0414"],
+        "linked_dockets": [],
         "milestones": [
             {"step": "Production Clearance", "status": "COMPLETED", "date": "2026-10-10"},
             {"step": "AERB Radio-Chemical Assay", "status": "COMPLETED", "date": "2026-10-12"},
-            {"step": "Inter-State Transit Pass", "status": "HALTED", "reason": "Central Safety Cell Audit Hold Ref: DISP-2026-0414"}
+            {"step": "Inter-State Transit Pass", "status": "HALTED", "reason": "Central Safety Cell Audit Hold"}
         ]
     })
 
