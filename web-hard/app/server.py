@@ -84,7 +84,75 @@ def get_db():
 
 @app.route('/robots.txt')
 def robots_txt():
-    content = "User-agent: *\nDisallow: /scada/clearance-claim\nDisallow: /scada/nodes\n"
+    content = """# ==============================================================================
+# MAIT NUCLEAR RESEARCH FACILITY (MAIT-NRF) - SECTOR 22 ROHINI
+# C&I AIR-GAP PERIMETER GATEWAY (KAVACH-SCADA v4.8)
+# CLASSIFICATION: CONFIDENTIAL / AERB-DAE STATUTORY RESTRICTED OT NETWORK
+# WARNING: COMPLIANCE WITH NCIIPC GUIDELINES & CERT-In DIRECTIVES MANDATED.
+# ==============================================================================
+# AUDIT & HONEYPOT CONTROLS DIRECTIVE:
+# [!] Automated vulnerability scanners, LLM crawlers, and unauthenticated spiders 
+#     are actively monitored. Decommissioned / trapped endpoints are flagged 
+#     as [deprecated] and mapped to isolated decoy honeypot observers.
+# [!] Valid active operator interfaces are maintained under [alive] status.
+# [!] All automated indexing outside designated operational routes is prohibited.
+# ==============================================================================
+
+User-agent: *
+Disallow: /scada/overview # [alive]
+Disallow: /scada/mimic # [alive]
+Disallow: /scada/diagnostics # [alive]
+Disallow: /scada/historian # [alive]
+Disallow: /scada/maintenance # [alive]
+Disallow: /scada/registers # [alive]
+Disallow: /scada/instruments # [alive]
+Disallow: /api/v1/scada/overview # [alive]
+Disallow: /api/v1/scada/alarms # [alive]
+Disallow: /api/v1/scada/registers # [alive]
+Disallow: /api/v1/scada/telemetry # [alive]
+Disallow: /api/v1/scada/maintenance/work-orders # [alive]
+Disallow: /api/v1/scada/diagnostics/probe # [alive]
+Disallow: /api/v1/scada/diagnostics/nodes # [alive]
+Disallow: /scada/v1/modbus-gateway # [deprecated]
+Disallow: /scada/v1/actuator-matrix # [deprecated]
+Disallow: /scada/nodes # [deprecated]
+Disallow: /scada/v2/scram-relay # [deprecated]
+Disallow: /scada/legacy/plc-bridge # [deprecated]
+Disallow: /scada/safety/interlock-dump # [deprecated]
+Disallow: /scada/firmware/ota-staging # [deprecated]
+Disallow: /scada/calibration/relay-override # [deprecated]
+Disallow: /scada/controller/debug-bridge # [deprecated]
+Disallow: /scada/honey/dae-canary # [deprecated]
+Disallow: /scada/rtu-backup-pool # [deprecated]
+Disallow: /scada/plc/siemens-s7-sim # [deprecated]
+Disallow: /scada/modbus/tcp-gateway # [deprecated]
+Disallow: /scada/opc-ua/server # [deprecated]
+Disallow: /scada/dnp3/outstation # [deprecated]
+Disallow: /scada/bacnet/field-bus # [deprecated]
+Disallow: /scada/hmi/remote-terminal # [deprecated]
+Disallow: /scada/safety-instrumented/sis-402 # [deprecated]
+Disallow: /scada/vault-audit/clearance-v2 # [deprecated]
+Disallow: /scada/clearance-claim # [deprecated]
+Disallow: /scada/telemetry/canary-trap # [deprecated]
+Disallow: /scada/trap/honey-logger # [deprecated]
+Disallow: /scada/auth/ldap-bridge # [deprecated]
+Disallow: /scada/auth/radius-client # [deprecated]
+Disallow: /scada/supervisor/voucher-service # [deprecated]
+Disallow: /scada/containment/airlock-ctl # [deprecated]
+Disallow: /scada/coolant/boron-injection # [deprecated]
+Disallow: /scada/pht/pressurizer-heater # [deprecated]
+Disallow: /scada/neutron/flux-detector # [deprecated]
+Disallow: /scada/fuel-handling/crane-ctl # [deprecated]
+Disallow: /scada/turbines/trip-bypass # [deprecated]
+Disallow: /scada/emergency/diesel-generator # [deprecated]
+Disallow: /scada/radiation/perimeter-monitors # [deprecated]
+Disallow: /scada/sec-ops/audit-collector # [deprecated]
+Disallow: /scada/core/poison-injection # [deprecated]
+Disallow: /scada/telemetry/raw-stream # [deprecated]
+Disallow: /scada/archive/blackbox-dump # [deprecated]
+Disallow: /scada/sysadmin/terminal-ssh # [deprecated]
+Disallow: /scada/gateway/firmware-backup # [deprecated]
+"""
     return content, 200, {'Content-Type': 'text/plain'}
 
 @app.route('/scada/clearance-claim', methods=['GET', 'POST'])
