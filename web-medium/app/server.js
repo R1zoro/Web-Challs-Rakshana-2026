@@ -17,7 +17,7 @@ const {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const JWT_SECRET = process.env.JWT_SECRET || "M41T_NRF_Int3rn4l_JvvT_S3cr3t_!2026";
+const JWT_SECRET = process.env.JWT_SECRET || "M41T_NRF_C&I_BUS_VERIFIER_KEY_2026";
 const PRIVILEGED_ROLES = ["commander", "admin", "incident_commander", "employee", "operator"];
 
 const SECRET = process.env.COREZERO_FLAG_HMAC_SECRET || "CTF_Rak5hna_Ori3ntat1on";
@@ -46,6 +46,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -112,23 +113,28 @@ function getUserPrototype(userKey) {
     return userSessionPrototypes.get(userKey);
 }
 
-// Single Source of Truth: JWT Authentication Middleware (Uses exclusively 'nrf_token')
+// Robust JWT Authentication Middleware (Verifies 'nrf_token')
 app.use((req, res, next) => {
-    const token = req.cookies.nrf_token || (req.headers.authorization && req.headers.authorization.split(' ')[1]);
-    if (token) {
+    let rawToken = req.cookies.nrf_token || (req.headers.authorization && req.headers.authorization.split(' ')[1]);
+    if (rawToken && typeof rawToken === 'string') {
+        const token = rawToken.trim().replace(/^["']|["']$/g, '');
+        const verifyOptions = { clockTolerance: 300, algorithms: ['HS256'] };
+        let decoded = null;
+
         try {
-            const decoded = jwt.verify(token, JWT_SECRET);
-            req.user = decoded;
-        } catch (err) {
+            decoded = jwt.verify(token, JWT_SECRET, verifyOptions);
+        } catch (e1) {
             try {
-                // Fallback verification: in case participant signed with raw base64 string
-                const rawB64 = Buffer.from(JWT_SECRET).toString('base64');
-                const decodedB64 = jwt.verify(token, rawB64);
-                req.user = decodedB64;
-            } catch (err2) {
-                req.user = null;
+                decoded = jwt.verify(token, Buffer.from(JWT_SECRET, 'base64'), verifyOptions);
+            } catch (e2) {
+                try {
+                    decoded = jwt.verify(token, Buffer.from(JWT_SECRET).toString('base64'), verifyOptions);
+                } catch (e3) {
+                    decoded = null;
+                }
             }
         }
+        req.user = decoded;
     } else {
         req.user = null;
     }
@@ -530,6 +536,66 @@ app.get('/api/v1/telemetry/live', (req, res) => {
         gamma_radiation_usvh: 0.14,
         scram_status: "ARMED_AND_READY",
         timestamp: new Date().toISOString()
+    });
+});
+
+app.get('/api/v1/reactor/thermal-hydraulics', (req, res) => {
+    res.json({
+        status: "success",
+        loop_primary: { flow_rate_kg_s: 412.5, inlet_temp_c: 288.4, outlet_temp_c: 342.1, core_delta_t_c: 53.7, loop_pressure_bar: 139.4 },
+        loop_secondary: { steam_generator_pressure_bar: 68.2, feed_water_temp_c: 195.0, steam_flow_t_h: 240.8 },
+        coolant_chemistry: { ph_at_25c: 9.2, dissolved_oxygen_ppb: 4.8, lithium_ppm: 2.15, boron_ppm: 1450 }
+    });
+});
+
+app.get('/api/v1/sensors/neutron-flux', (req, res) => {
+    res.json({
+        status: "success",
+        channels: [
+            { detector: "EXCORE-SOURCE-01", count_cps: 342, status: "NOMINAL" },
+            { detector: "EXCORE-INTERMEDIATE-02", count_amps: 1.4e-6, status: "NOMINAL" },
+            { detector: "EXCORE-POWER-03A", flux_pct: 99.4, status: "ACTIVE" },
+            { detector: "EXCORE-POWER-03B", flux_pct: 99.2, status: "ACTIVE" }
+        ],
+        axial_offset_pct: -1.4,
+        quadrant_tilt_ratio: 1.012
+    });
+});
+
+app.get('/api/v1/sensors/containment-atmosphere', (req, res) => {
+    res.json({
+        status: "success",
+        containment_atmosphere: {
+            hydrogen_recombiner_active: true,
+            hydrogen_vol_pct: 0.12,
+            dome_pressure_kpa: 104.2,
+            containment_ambient_c: 38.6,
+            hepa_filter_delta_p_mmwc: 28.5
+        }
+    });
+});
+
+app.get('/api/v1/emergency/siren-grid', (req, res) => {
+    res.json({
+        status: "success",
+        siren_sectors: [
+            { id: "SIREN-SEC22-01", location: "Sector 22 Rohini North", battery_health: "98%", status: "STANDBY" },
+            { id: "SIREN-SEC22-02", location: "Ring Road Interchange", battery_health: "95%", status: "STANDBY" },
+            { id: "SIREN-SEC23-03", location: "Sector 23 Community Center", battery_health: "99%", status: "STANDBY" }
+        ]
+    });
+});
+
+app.get('/api/v1/inventory/heavy-water', (req, res) => {
+    res.json({
+        status: "success",
+        storage_inventory: {
+            moderator_inventory_tonnes: 142.8,
+            isotopic_purity_pct: 99.82,
+            reflector_inventory_tonnes: 48.6,
+            tritium_activity_ci_per_kg: 18.4,
+            reconversion_plant_status: "STANDBY"
+        }
     });
 });
 
