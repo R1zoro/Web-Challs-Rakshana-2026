@@ -151,7 +151,7 @@
                             <rect width="600" height="380" fill="url(#scadaGrid)" />
 
                             <!-- Primary Coolant Inflow / Outflow Pipes -->
-                            <path id="svgInletPipe" d="M 40 280 L 160 280 L 160 220" fill="none" stroke="#00f5d4" stroke-width="16" stroke-linecap="round" style="transition: stroke 0.6s ease;" />
+                            <path id="svgInletPipe" d="M 40 280 L 160 280 L 160 220" fill="none" stroke="#0284c7" stroke-width="16" stroke-linecap="round" style="transition: stroke 0.6s ease;" />
                             <path d="M 440 160 L 440 100 L 560 100" fill="none" stroke="#ef4444" stroke-width="16" stroke-linecap="round" />
                             <text x="50" y="260" fill="#38bdf8" font-size="11" font-family="monospace" font-weight="bold">D2O INLET [288°C]</text>
                             <text x="450" y="80" fill="#f87171" font-size="11" font-family="monospace" font-weight="bold">HOT LEG OUT [342°C]</text>
@@ -161,7 +161,7 @@
                             <rect x="180" y="70" width="240" height="240" rx="24" fill="#090d16" stroke="#334155" stroke-width="2" />
 
                             <!-- Heavy Water Moderator Liquid Fill -->
-                            <rect id="svgModeratorFill" x="182" y="90" width="236" height="218" rx="20" fill="#00f5d4" fill-opacity="0.65" style="transition: fill 0.6s ease, fill-opacity 0.6s ease;" />
+                            <rect id="svgModeratorFill" x="182" y="90" width="236" height="218" rx="20" fill="#0284c7" fill-opacity="0.60" style="transition: fill 0.6s ease, fill-opacity 0.6s ease;" />
 
                             <!-- Fuel Channel Pins (8 Channels) -->
                             <g id="svgFuelMatrix">
@@ -333,22 +333,22 @@ async function runSimulation(component) {
             const fillEl = document.getElementById("svgModeratorFill");
             const pipeEl = document.getElementById("svgInletPipe");
 
-            // Visually distinct color profiles for Heavy Water states:
-            // 380 kg/s -> Cool Cobalt Ocean Blue (low recirculation)
-            // 420 kg/s -> Bright Electric Turquoise / Cyan (nominal rated flow)
-            // 460 kg/s -> Intense Cherenkov Neon Purple / Violet (high-velocity emergency recirculation)
-            let waterColor = "#00f5d4"; // Default 420 nominal cyan
+            // Visually distinct blue color spectrum for Heavy Water states:
+            // 380 kg/s -> Light Sky Blue (low recirculation flow)
+            // 420 kg/s -> Medium Azure Blue (nominal rated primary flow)
+            // 460 kg/s -> Very Dark Navy Blue (maximum emergency cooling flow)
+            let waterColor = "#0284c7"; // Default 420 nominal azure blue
             let waterOpacity = "0.65";
 
             if (flowRate === 380) {
-                waterColor = "#0284c7"; // Deep cobalt blue
+                waterColor = "#38bdf8"; // Light sky blue
                 waterOpacity = "0.35";
             } else if (flowRate === 420) {
-                waterColor = "#00f5d4"; // Electric turquoise
+                waterColor = "#0284c7"; // Medium azure blue
                 waterOpacity = "0.65";
             } else if (flowRate === 460) {
-                waterColor = "#a855f7"; // Glowing neon violet
-                waterOpacity = "0.85";
+                waterColor = "#1e3a8a"; // Very dark navy blue
+                waterOpacity = "0.95";
             }
 
             fillEl.setAttribute("fill", waterColor);
