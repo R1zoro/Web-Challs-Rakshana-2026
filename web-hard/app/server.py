@@ -40,7 +40,7 @@ def make_participant_web_flag(email: str, difficulty: str) -> str:
 
 @app.before_request
 def enforce_email_gate():
-    if request.path.startswith('/static') or request.path in ['/gate', '/gate/submit']:
+    if request.path.startswith('/static') or request.path in ['/gate', '/gate/submit', '/robots.txt']:
         return None
 
     chall_cookie = request.cookies.get('Web_Chall_cookie')
@@ -81,6 +81,11 @@ def get_db():
 # =========================================================================
 # APPLICATION VIEWS (MULTI-PAGE INDUSTRIAL SCADA WORKSTATION)
 # =========================================================================
+
+@app.route('/robots.txt')
+def robots_txt():
+    content = "User-agent: *\nDisallow: /scada/clearance-claim\nDisallow: /scada/nodes\n"
+    return content, 200, {'Content-Type': 'text/plain'}
 
 @app.route('/scada/clearance-claim', methods=['GET', 'POST'])
 def clearance_claim():
