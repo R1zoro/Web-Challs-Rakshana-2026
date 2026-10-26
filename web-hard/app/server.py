@@ -90,13 +90,6 @@ def robots_txt():
 # CLASSIFICATION: CONFIDENTIAL / AERB-DAE STATUTORY RESTRICTED OT NETWORK
 # WARNING: COMPLIANCE WITH NCIIPC GUIDELINES & CERT-In DIRECTIVES MANDATED.
 # ==============================================================================
-# AUDIT & HONEYPOT CONTROLS DIRECTIVE:
-# [!] Automated vulnerability scanners, LLM crawlers, and unauthenticated spiders 
-#     are actively monitored. Decommissioned / trapped endpoints are flagged 
-#     as [deprecated] and mapped to isolated decoy honeypot observers.
-# [!] Valid active operator interfaces are maintained under [alive] status.
-# [!] All automated indexing outside designated operational routes is prohibited.
-# ==============================================================================
 
 User-agent: *
 Disallow: /scada/overview # [alive]
