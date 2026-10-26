@@ -3,135 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAIT-NRF Incident Portal | CTF Session Authorization</title>
+    <title>Rakshna CTF Gateway</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        :root {
-            --nrf-bg: #090e17;
-            --nrf-card: #0f172a;
-            --nrf-accent: #0284c7;
-            --nrf-accent-glow: #38bdf8;
-            --nrf-border: #1e293b;
-        }
         body {
-            background-color: var(--nrf-bg);
-            color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 1.5rem;
         }
-        .gate-card {
-            background: var(--nrf-card);
-            border: 1px solid var(--nrf-border);
-            border-top: 4px solid var(--nrf-accent-glow);
-            border-radius: 10px;
-            max-width: 520px;
+        .gateway-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            max-width: 480px;
             width: 100%;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            padding: 2.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
         }
-        .badge-sis {
-            background-color: rgba(56, 189, 248, 0.15);
-            color: var(--nrf-accent-glow);
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-        }
-        .btn-cyan {
-            background-color: var(--nrf-accent-glow);
-            color: #0f172a;
-            font-weight: 700;
+        .btn-primary-custom {
+            background-color: #2563eb;
+            color: #ffffff;
+            font-weight: 600;
             border: none;
-            transition: all 0.2s ease;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: background-color 0.15s ease-in-out;
         }
-        .btn-cyan:hover {
-            background-color: #7dd3fc;
-            color: #000;
-            transform: translateY(-1px);
-        }
-        .form-control-dark {
-            background-color: #020617;
-            border: 1px solid var(--nrf-border);
+        .btn-primary-custom:hover {
+            background-color: #1d4ed8;
             color: #ffffff;
-            font-size: 1rem;
+        }
+        .form-control-custom {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
             padding: 0.75rem 1rem;
+            font-size: 0.95rem;
         }
-        .form-control-dark:focus {
-            background-color: #000000;
-            border-color: var(--nrf-accent-glow);
-            color: #ffffff;
-            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+        .form-control-custom:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
     </style>
 </head>
 <body>
-    <div class="gate-card p-4 p-sm-5">
+    <div class="gateway-card">
         <div class="text-center mb-4">
-            <span class="badge badge-sis text-uppercase py-1 px-3 mb-2">
-                <i class="bi bi-radioactive me-1"></i> AERB Level-3 Operational Interlock
-            </span>
-            <h3 class="fw-bold text-white mt-1 mb-1 tracking-tight">MAIT-NRF Incident Portal</h3>
-            <p class="text-secondary small mb-0">Nuclear Research Facility &bull; Emergency Response Division</p>
+            <h3 class="fw-bold text-slate-900 mb-1">Rakshna CTF Gateway</h3>
+            <p class="text-muted small mb-0">Session Identity Verification</p>
         </div>
 
         <% if (error) { %>
-        <div class="alert alert-danger py-2 px-3 small d-flex align-items-center gap-2 mb-4" role="alert">
-            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-            <div><%= error %></div>
+        <div class="alert alert-danger py-2 px-3 small mb-4" role="alert">
+            <%= error %>
         </div>
         <% } %>
 
-        <div class="card bg-black bg-opacity-40 border-secondary border-opacity-25 p-3 mb-4 small text-secondary">
-            <div class="d-flex align-items-start gap-2">
-                <i class="bi bi-info-circle-fill text-info fs-6 mt-0.5"></i>
-                <div>
-                    <strong class="text-light">Mandatory CTF Session Initialization</strong><br>
-                    Please enter the <strong>exact email address</strong> registered on your CTF platform profile. 
-                    Your session will be authenticated and locked to <code class="text-info">Web_Chall_cookie</code> to deliver your resolution flag upon reactor SCRAM override.
-                </div>
-            </div>
+        <div class="alert alert-light border border-slate-200 py-3 px-3 small text-secondary mb-4">
+            Please enter the exact email address registered on your CTF platform profile. This is to ensure you get your flag that is accepted by the CTF platform else your flag wouldnot get submitted
         </div>
 
         <form action="/gate/submit" method="POST">
             <input type="hidden" name="next" value="<%= nextUrl %>">
             
             <div class="mb-4">
-                <label for="email" class="form-label text-light fw-semibold small text-uppercase">
+                <label for="email" class="form-label text-dark fw-semibold small">
                     Registered CTF Email Address
                 </label>
-                <div class="input-group">
-                    <span class="input-group-text bg-dark border-secondary border-opacity-50 text-secondary">
-                        <i class="bi bi-envelope-at-fill"></i>
-                    </span>
-                    <input 
-                        type="email" 
-                        class="form-control form-control-dark" 
-                        id="email" 
-                        name="email" 
-                        placeholder="e.g. participant@gmail.com" 
-                        value="<%= currentEmail %>" 
-                        required 
-                        autocomplete="email"
-                        autofocus
-                    >
-                </div>
-                <div class="form-text text-secondary opacity-75 small mt-1">
-                    Any valid email address registered with the CTF platform is accepted.
-                </div>
+                <input 
+                    type="email" 
+                    class="form-control form-control-custom" 
+                    id="email" 
+                    name="email" 
+                    placeholder="user@example.com" 
+                    value="<%= currentEmail %>" 
+                    required 
+                    autocomplete="email"
+                    autofocus
+                >
             </div>
 
-            <button type="submit" class="btn btn-cyan w-100 py-2 d-flex align-items-center justify-content-center gap-2">
-                <i class="bi bi-shield-check fs-5"></i>
-                <span>Initialize Incident Console</span>
+            <button type="submit" class="btn btn-primary-custom w-100">
+                Continue to Challenge
             </button>
         </form>
-
-        <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 text-center text-secondary small">
-            <span>MAIT Nuclear Research Facility &bull; Emergency Supervisory Terminal #02</span>
-        </div>
     </div>
 </body>
 </html>

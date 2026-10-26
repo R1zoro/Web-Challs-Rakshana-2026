@@ -2,25 +2,30 @@ import os
 import re
 import time
 import hashlib
+import hmac
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from procurement_data import NEWS_TICKER, VENDORS, CIRCULARS, TENDERS
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "M_AMCEL_Static_Session_Secret_2026_Prod!")
 
-FLAG_SALT = os.environ.get("FLAG_SALT", "M41T_NRF_KAVACH_S3CR3T_SALT_992")
+SECRET = os.environ.get("COREZERO_FLAG_HMAC_SECRET", "CTF_Rak5hna_Ori3ntat1on")
 
-CHALLENGE_BASES = {
-    "web_easy": "1d0r_r3v34ls_pr0cur3m3nt_l34k",
-    "web_medium": "pr0t0typ3_p0llut10n_scv4m_c0r3",
-    "web_hard": "sc4d4_ssrf_t0_rc3_pr1v3sc_m3ltd0wn"
+ORIGINAL_FLAGS = {
+    "easy": "RAKSHNA{1d0r_r3v34ls_pr0cur3m3nt_l34k}",
+    "medium": "RAKSHNA{pr0t0typ3_p0llut10n_scv4m_c0r3}",
+    "hard": "RAKSHNA{sc4d4_ssrf_t0_rc3_pr1v3sc_m3ltd0wn}"
 }
 
-def generate_flag(email: str, chall_id: str) -> str:
-    clean_email = (email or 'participant@ctf.local').strip().lower()
-    user_hash = hashlib.sha256(f"{FLAG_SALT}:{chall_id}:{clean_email}".encode()).hexdigest()[:8]
-    base_text = CHALLENGE_BASES.get(chall_id, "flag")
-    return f"RAKSHNA{{{base_text}_{user_hash}}}"
+def make_participant_web_flag(email: str, difficulty: str) -> str:
+    normalized_email = str(email or 'participant@ctf.local').strip().lower()
+    normalized_difficulty = str(difficulty or 'easy').strip().lower()
+    original_flag = ORIGINAL_FLAGS.get(normalized_difficulty, "RAKSHNA{flag}")
+
+    tier = f"web_{normalized_difficulty}"
+    suffix = hmac.new(SECRET.encode('utf-8'), f"{normalized_email}|{tier}".encode('utf-8'), hashlib.sha256).hexdigest()
+    base_payload = original_flag[8:-1]
+    return f"RAKSHNA{{{base_payload}_{suffix}}}"
 
 @app.before_request
 def enforce_email_gate():
@@ -498,7 +503,7 @@ def get_grievance():
     response_ticket = dict(ticket)
     if str(query_id) in ["DISP-2026-0414", "4"]:
         user_email = request.cookies.get('Web_Chall_cookie', '')
-        dynamic_flag = generate_flag(user_email, "web_easy")
+        dynamic_flag = make_participant_web_flag(user_email, "easy")
         response_ticket['body'] = re.sub(r'RAKSHNA\{[^\}]+\}', dynamic_flag, response_ticket['body'])
 
     return jsonify({

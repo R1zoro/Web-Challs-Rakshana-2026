@@ -14,23 +14,29 @@ import json
 import os
 import time
 
+import hmac
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "KAVACH_SCADA_SECRET_2026_PROD!")
 DB_PATH = os.path.join(os.path.dirname(__file__), "kavach_scada.db")
 
-FLAG_SALT = os.environ.get("FLAG_SALT", "M41T_NRF_KAVACH_S3CR3T_SALT_992")
+SECRET = os.environ.get("COREZERO_FLAG_HMAC_SECRET", "CTF_Rak5hna_Ori3ntat1on")
 
-CHALLENGE_BASES = {
-    "web_easy": "1d0r_r3v34ls_pr0cur3m3nt_l34k",
-    "web_medium": "pr0t0typ3_p0llut10n_scv4m_c0r3",
-    "web_hard": "sc4d4_ssrf_t0_rc3_pr1v3sc_m3ltd0wn"
+ORIGINAL_FLAGS = {
+    "easy": "RAKSHNA{1d0r_r3v34ls_pr0cur3m3nt_l34k}",
+    "medium": "RAKSHNA{pr0t0typ3_p0llut10n_scv4m_c0r3}",
+    "hard": "RAKSHNA{sc4d4_ssrf_t0_rc3_pr1v3sc_m3ltd0wn}"
 }
 
-def generate_flag(email: str, chall_id: str) -> str:
-    clean_email = (email or 'participant@ctf.local').strip().lower()
-    user_hash = hashlib.sha256(f"{FLAG_SALT}:{chall_id}:{clean_email}".encode()).hexdigest()[:8]
-    base_text = CHALLENGE_BASES.get(chall_id, "flag")
-    return f"RAKSHNA{{{base_text}_{user_hash}}}"
+def make_participant_web_flag(email: str, difficulty: str) -> str:
+    normalized_email = str(email or 'participant@ctf.local').strip().lower()
+    normalized_difficulty = str(difficulty or 'hard').strip().lower()
+    original_flag = ORIGINAL_FLAGS.get(normalized_difficulty, "RAKSHNA{flag}")
+
+    tier = f"web_{normalized_difficulty}"
+    suffix = hmac.new(SECRET.encode('utf-8'), f"{normalized_email}|{tier}".encode('utf-8'), hashlib.sha256).hexdigest()
+    base_payload = original_flag[8:-1]
+    return f"RAKSHNA{{{base_payload}_{suffix}}}"
 
 @app.before_request
 def enforce_email_gate():
@@ -85,7 +91,7 @@ def clearance_claim():
         if voucher != "KAVACH-OVERRIDE-AERB-9941":
             return render_template('clearance_claim.html', error="Invalid SIS Recovery Voucher Key. Core interlocks remain latched.")
 
-        flag = generate_flag(user_email, "web_hard")
+        flag = make_participant_web_flag(user_email, "hard")
         return render_template('clearance_claim.html', success=True, flag=flag, email=user_email)
 
     return render_template('clearance_claim.html')

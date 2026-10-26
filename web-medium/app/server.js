@@ -20,20 +20,25 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || "M41T_NRF_Int3rn4l_JvvT_S3cr3t_!2026";
 const PRIVILEGED_ROLES = ["commander", "admin", "incident_commander", "employee", "operator"];
 
-const FLAG_SALT = process.env.FLAG_SALT || "M41T_NRF_KAVACH_S3CR3T_SALT_992";
+const SECRET = process.env.COREZERO_FLAG_HMAC_SECRET || "CTF_Rak5hna_Ori3ntat1on";
 
-function generateFlag(email, challId) {
-    const bases = {
-        web_easy: "1d0r_r3v34ls_pr0cur3m3nt_l34k",
-        web_medium: "pr0t0typ3_p0llut10n_scv4m_c0r3",
-        web_hard: "sc4d4_ssrf_t0_rc3_pr1v3sc_m3ltd0wn"
-    };
-    const cleanEmail = (email || 'participant@ctf.local').trim().toLowerCase();
-    const userHash = crypto.createHash('sha256')
-        .update(`${FLAG_SALT}:${challId}:${cleanEmail}`)
-        .digest('hex')
-        .substring(0, 8);
-    return `RAKSHNA{${bases[challId]}_${userHash}}`;
+const ORIGINAL_FLAGS = {
+    easy: "RAKSHNA{1d0r_r3v34ls_pr0cur3m3nt_l34k}",
+    medium: "RAKSHNA{pr0t0typ3_p0llut10n_scv4m_c0r3}",
+    hard: "RAKSHNA{sc4d4_ssrf_t0_rc3_pr1v3sc_m3ltd0wn}"
+};
+
+function makeParticipantWebFlag({ email, difficulty, originalFlag }) {
+    const normalizedEmail = String(email || 'participant@ctf.local').trim().toLowerCase();
+    const normalizedDifficulty = String(difficulty || 'medium').trim().toLowerCase();
+    const base = String(originalFlag || ORIGINAL_FLAGS[normalizedDifficulty] || '').trim();
+
+    const tier = `web_${normalizedDifficulty}`;
+    const suffix = crypto.createHmac('sha256', Buffer.from(SECRET, 'utf8'))
+        .update(`${normalizedEmail}|${tier}`, 'utf8')
+        .digest('hex');
+
+    return `RAKSHNA{${base.slice(8, -1)}_${suffix}}`;
 }
 
 // Middleware
@@ -727,7 +732,11 @@ app.post('/reactor/scram/override', (req, res) => {
     const currentTokens = Number(req.userConfig.tokens) || 1000;
 
     const userEmail = req.cookies.Web_Chall_cookie || 'participant@ctf.local';
-    const dynamicFlag = generateFlag(userEmail, "web_medium");
+    const dynamicFlag = makeParticipantWebFlag({
+        email: userEmail,
+        difficulty: 'medium',
+        originalFlag: 'RAKSHNA{pr0t0typ3_p0llut10n_scv4m_c0r3}'
+    });
 
     // SUCCESS! Core Scrammed -> Reveals Flag and Hard challenge IP
     res.render('scram_success', {
