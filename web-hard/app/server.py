@@ -90,22 +90,26 @@ def robots_txt():
 # CLASSIFICATION: CONFIDENTIAL / AERB-DAE STATUTORY RESTRICTED OT NETWORK
 # WARNING: COMPLIANCE WITH NCIIPC GUIDELINES & CERT-In DIRECTIVES MANDATED.
 # ==============================================================================
+# [!] All automated indexing outside designated operational routes is prohibited.
+# [!] Valid active operator interfaces are maintained under [alive] status.
+# [!] Decommissioned legacy interfaces and retired endpoints are designated [deprecated].
+# ==============================================================================
 
 User-agent: *
-Disallow: /scada/overview # [alive]
-Disallow: /scada/mimic # [alive]
-Disallow: /scada/diagnostics # [alive]
-Disallow: /scada/historian # [alive]
-Disallow: /scada/maintenance # [alive]
-Disallow: /scada/registers # [alive]
-Disallow: /scada/instruments # [alive]
-Disallow: /api/v1/scada/overview # [alive]
-Disallow: /api/v1/scada/alarms # [alive]
-Disallow: /api/v1/scada/registers # [alive]
-Disallow: /api/v1/scada/telemetry # [alive]
-Disallow: /api/v1/scada/maintenance/work-orders # [alive]
-Disallow: /api/v1/scada/diagnostics/probe # [alive]
-Disallow: /api/v1/scada/diagnostics/nodes # [alive]
+Allow: /scada/overview # [alive]
+Allow: /scada/mimic # [alive]
+Allow: /scada/diagnostics # [alive]
+Allow: /scada/historian # [alive]
+Allow: /scada/maintenance # [alive]
+Allow: /scada/registers # [alive]
+Allow: /scada/instruments # [alive]
+Allow: /api/v1/scada/overview # [alive]
+Allow: /api/v1/scada/alarms # [alive]
+Allow: /api/v1/scada/registers # [alive]
+Allow: /api/v1/scada/telemetry # [alive]
+Allow: /api/v1/scada/maintenance/work-orders # [alive]
+Allow: /api/v1/scada/diagnostics/probe # [alive]
+Allow: /api/v1/scada/diagnostics/nodes # [alive]
 Disallow: /scada/v1/modbus-gateway # [deprecated]
 Disallow: /scada/v1/actuator-matrix # [deprecated]
 Disallow: /scada/nodes # [deprecated]
