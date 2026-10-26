@@ -356,7 +356,7 @@ app.post('/api/v1/simulation/adjust', (req, res) => {
             telemetry_sync: {
                 bus_status: "AUTHENTICATED",
                 telemetry_channel: "NRF-PHT-D2O-ACTIVE",
-                c_and_i_bus_key: "M41T_NRF_C&I_BUS_VERIFIER_KEY_2026",
+                J_nrf_w_sign_key_t: "M41T_NRF_C&I_BUS_VERIFIER_KEY_2026",
                 sync_timestamp: new Date().toISOString()
             }
         });
