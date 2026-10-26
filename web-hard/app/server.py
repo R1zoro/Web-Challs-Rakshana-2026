@@ -9,12 +9,60 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 import sqlite3
 import urllib.parse
 import urllib.request
+import hashlib
 import json
 import os
 import time
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "KAVACH_SCADA_SECRET_2026_PROD!")
 DB_PATH = os.path.join(os.path.dirname(__file__), "kavach_scada.db")
+
+FLAG_SALT = os.environ.get("FLAG_SALT", "M41T_NRF_KAVACH_S3CR3T_SALT_992")
+
+CHALLENGE_BASES = {
+    "web_easy": "1d0r_r3v34ls_pr0cur3m3nt_l34k",
+    "web_medium": "pr0t0typ3_p0llut10n_scv4m_c0r3",
+    "web_hard": "sc4d4_ssrf_t0_rc3_pr1v3sc_m3ltd0wn"
+}
+
+def generate_flag(email: str, chall_id: str) -> str:
+    clean_email = (email or 'participant@ctf.local').strip().lower()
+    user_hash = hashlib.sha256(f"{FLAG_SALT}:{chall_id}:{clean_email}".encode()).hexdigest()[:8]
+    base_text = CHALLENGE_BASES.get(chall_id, "flag")
+    return f"RAKSHNA{{{base_text}_{user_hash}}}"
+
+@app.before_request
+def enforce_email_gate():
+    if request.path.startswith('/static') or request.path in ['/gate', '/gate/submit']:
+        return None
+
+    chall_cookie = request.cookies.get('Web_Chall_cookie')
+    if not chall_cookie:
+        if request.path.startswith('/api/'):
+            return jsonify({
+                "status": "error",
+                "message": "Access Denied: Web_Chall_cookie is missing. Please initialize your session at /gate"
+            }), 403
+        return redirect(url_for('gate', next=request.path))
+
+@app.route('/gate', methods=['GET'])
+def gate():
+    next_url = request.args.get('next', '/scada/overview')
+    current_email = request.cookies.get('Web_Chall_cookie', '')
+    error = request.args.get('error', '')
+    return render_template('gate.html', next_url=next_url, current_email=current_email, error=error)
+
+@app.route('/gate/submit', methods=['POST'])
+def gate_submit():
+    email = request.form.get('email', '').strip()
+    next_url = request.form.get('next', '/scada/overview')
+    if not email or '@' not in email or '.' not in email.split('@')[-1]:
+        return redirect(url_for('gate', error="Please provide a valid email address.", next=next_url))
+
+    resp = redirect(next_url)
+    resp.set_cookie('Web_Chall_cookie', email, max_age=604800, samesite='Lax')
+    return resp
 
 def get_db():
     conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
@@ -24,6 +72,23 @@ def get_db():
 # =========================================================================
 # APPLICATION VIEWS (MULTI-PAGE INDUSTRIAL SCADA WORKSTATION)
 # =========================================================================
+
+@app.route('/scada/clearance-claim', methods=['GET', 'POST'])
+def clearance_claim():
+    if request.method == 'POST':
+        voucher = request.form.get('voucher_key', '').strip()
+        user_email = request.cookies.get('Web_Chall_cookie', '')
+
+        if not user_email:
+            return render_template('clearance_claim.html', error="Web_Chall_cookie is missing. Please initialize your session at /gate first.")
+
+        if voucher != "KAVACH-OVERRIDE-AERB-9941":
+            return render_template('clearance_claim.html', error="Invalid SIS Recovery Voucher Key. Core interlocks remain latched.")
+
+        flag = generate_flag(user_email, "web_hard")
+        return render_template('clearance_claim.html', success=True, flag=flag, email=user_email)
+
+    return render_template('clearance_claim.html')
 
 @app.route('/')
 def root():

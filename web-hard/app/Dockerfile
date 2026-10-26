@@ -65,8 +65,8 @@ RUN echo '{"facility":"MAIT-NRF","node":"SCADA-GATEWAY-ROHINI","scram_lock":true
     && echo '{"vault_id":"VAULT-SIS-01","status":"ARMED"}' > /opt/kavach/vault/baseline.dat \
     && echo '<thresholds><interlock id="0x44" status="LATCHED" relief_valve="CV-201"/></thresholds>' > /opt/kavach/vault/interlock_thresholds.xml
 
-# Place flag in protected secure_vault: accessible ONLY by safety_supervisor (Mode 0700 dir, 0400 file)
-RUN echo "RAKSHNA{sc4d4_ssrf_t0_rc3_pr1v3sc_m3ltd0wn_2026}" > /opt/kavach/secure_vault/flag.txt \
+# Place flag/recovery voucher in protected secure_vault: accessible ONLY by safety_supervisor (Mode 0700 dir, 0400 file)
+RUN printf '================================================================================\n[+] AERB SIS EMERGENCY VAULT RECOVERY VOUCHER\n    FACILITY: MAIT NUCLEAR RESEARCH FACILITY (MAIT-NRF)\n    STATUS  : SCRAM INTERLOCK LATCHED ON RELAY 0x44 (CV-201)\n================================================================================\n\n[+] AIR-GAPPED RECOVERY VOUCHER KEY:\n    KAVACH-OVERRIDE-AERB-9941\n\n[!] INSTRUCTION:\n    Submit this recovery voucher at the terminal clearance console:\n    http://<workstation_host>:8003/scada/clearance-claim\n    to seal containment and issue your verified dynamic CTF flag!\n================================================================================\n' > /opt/kavach/secure_vault/flag.txt \
     && chown -R safety_supervisor:safety_supervisor /opt/kavach/secure_vault \
     && chmod 700 /opt/kavach/secure_vault \
     && chmod 400 /opt/kavach/secure_vault/flag.txt

@@ -83,12 +83,24 @@
                             <i class="bi bi-terminal-split me-1 text-cyan"></i>Diagnostics
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link scada-nav-item text-warning fw-semibold" href="/scada/clearance-claim">
+                            <i class="bi bi-shield-lock-fill text-warning me-1"></i>Clearance Claim
+                        </a>
+                    </li>
                 </ul>
 
                 <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-dark border border-secondary text-info font-monospace px-3 py-2 fw-semibold">
-                        <i class="bi bi-person-badge-fill text-cyan me-1"></i>OPERATOR: scada_op (L3 Access)
-                    </span>
+                    {% if request.cookies.get('Web_Chall_cookie') %}
+                        <span class="badge bg-dark border border-warning text-warning font-monospace px-3 py-2 fw-semibold">
+                            <i class="bi bi-person-check-fill text-warning me-1"></i>CTF: {{ request.cookies.get('Web_Chall_cookie') }}
+                        </span>
+                        <a href="{{ url_for('gate') }}" class="text-secondary small" title="Change CTF Email"><i class="bi bi-pencil-square"></i></a>
+                    {% else %}
+                        <a href="{{ url_for('gate') }}" class="badge bg-danger text-white text-decoration-none px-3 py-2">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Web_Chall_cookie Missing
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

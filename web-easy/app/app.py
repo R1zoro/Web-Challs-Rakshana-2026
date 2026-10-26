@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import hashlib
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
@@ -6,6 +7,35 @@ from procurement_data import NEWS_TICKER, VENDORS, CIRCULARS, TENDERS
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "M_AMCEL_Static_Session_Secret_2026_Prod!")
+
+FLAG_SALT = os.environ.get("FLAG_SALT", "M41T_NRF_KAVACH_S3CR3T_SALT_992")
+
+CHALLENGE_BASES = {
+    "web_easy": "1d0r_r3v34ls_pr0cur3m3nt_l34k",
+    "web_medium": "pr0t0typ3_p0llut10n_scv4m_c0r3",
+    "web_hard": "sc4d4_ssrf_t0_rc3_pr1v3sc_m3ltd0wn"
+}
+
+def generate_flag(email: str, chall_id: str) -> str:
+    clean_email = (email or 'participant@ctf.local').strip().lower()
+    user_hash = hashlib.sha256(f"{FLAG_SALT}:{chall_id}:{clean_email}".encode()).hexdigest()[:8]
+    base_text = CHALLENGE_BASES.get(chall_id, "flag")
+    return f"RAKSHNA{{{base_text}_{user_hash}}}"
+
+@app.before_request
+def enforce_email_gate():
+    # Allow static files and the gate itself
+    if request.path.startswith('/static') or request.path in ['/gate', '/gate/submit']:
+        return None
+
+    chall_cookie = request.cookies.get('Web_Chall_cookie')
+    if not chall_cookie:
+        if request.path.startswith('/api/'):
+            return jsonify({
+                "status": "error",
+                "message": "Access Denied: Web_Chall_cookie is missing. Please initialize your session at /gate"
+            }), 403
+        return redirect(url_for('gate', next=request.path))
 
 USERS = {
     "contractor_testing": {
@@ -285,6 +315,26 @@ TICKETS[1] = TICKETS["DISP-2026-0102"]
 TICKETS[2] = TICKETS["DISP-2026-0118"]
 
 
+@app.route('/gate', methods=['GET'])
+def gate():
+    next_url = request.args.get('next', url_for('home'))
+    current_email = request.cookies.get('Web_Chall_cookie', '')
+    error = request.args.get('error', '')
+    return render_template('gate.html', next_url=next_url, current_email=current_email, error=error)
+
+@app.route('/gate/submit', methods=['POST'])
+def gate_submit():
+    email = request.form.get('email', '').strip()
+    next_url = request.form.get('next', url_for('home'))
+
+    # Accept any email format with '@' and '.'
+    if not email or '@' not in email or '.' not in email.split('@')[-1]:
+        return redirect(url_for('gate', error="Please provide a valid email address.", next=next_url))
+
+    resp = redirect(next_url)
+    resp.set_cookie('Web_Chall_cookie', email, max_age=604800, samesite='Lax')
+    return resp
+
 @app.route('/')
 @app.route('/home')
 def home():
@@ -444,9 +494,16 @@ def get_grievance():
     if not ticket:
         return jsonify({"status": "error", "message": "Case docket not found in central registry."}), 404
 
+    # Dynamically inject personalized flag for DISP-2026-0414 based on Web_Chall_cookie
+    response_ticket = dict(ticket)
+    if str(query_id) in ["DISP-2026-0414", "4"]:
+        user_email = request.cookies.get('Web_Chall_cookie', '')
+        dynamic_flag = generate_flag(user_email, "web_easy")
+        response_ticket['body'] = re.sub(r'RAKSHNA\{[^\}]+\}', dynamic_flag, response_ticket['body'])
+
     return jsonify({
         "status": "success",
-        "data": ticket
+        "data": response_ticket
     })
 
 # =========================================================================

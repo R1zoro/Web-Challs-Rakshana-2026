@@ -20,6 +20,22 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || "M41T_NRF_Int3rn4l_JvvT_S3cr3t_!2026";
 const PRIVILEGED_ROLES = ["commander", "admin", "incident_commander", "employee", "operator"];
 
+const FLAG_SALT = process.env.FLAG_SALT || "M41T_NRF_KAVACH_S3CR3T_SALT_992";
+
+function generateFlag(email, challId) {
+    const bases = {
+        web_easy: "1d0r_r3v34ls_pr0cur3m3nt_l34k",
+        web_medium: "pr0t0typ3_p0llut10n_scv4m_c0r3",
+        web_hard: "sc4d4_ssrf_t0_rc3_pr1v3sc_m3ltd0wn"
+    };
+    const cleanEmail = (email || 'participant@ctf.local').trim().toLowerCase();
+    const userHash = crypto.createHash('sha256')
+        .update(`${FLAG_SALT}:${challId}:${cleanEmail}`)
+        .digest('hex')
+        .substring(0, 8);
+    return `RAKSHNA{${bases[challId]}_${userHash}}`;
+}
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -27,6 +43,57 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Expose req to all EJS templates
+app.use((req, res, next) => {
+    res.locals.req = req;
+    next();
+});
+
+// Mandatory CTF Email Gate Middleware
+app.use((req, res, next) => {
+    // Exempt gate routes and static assets
+    if (
+        req.path === '/gate' ||
+        req.path === '/gate/submit' ||
+        req.path.startsWith('/css/') ||
+        req.path.startsWith('/js/') ||
+        req.path.startsWith('/images/') ||
+        req.path === '/favicon.ico'
+    ) {
+        return next();
+    }
+
+    const challCookie = req.cookies.Web_Chall_cookie;
+    if (!challCookie) {
+        if (req.path.startsWith('/api/') || req.xhr || (req.headers.accept && req.headers.accept.includes('application/json'))) {
+            return res.status(403).json({
+                status: "error",
+                message: "Access Denied: Web_Chall_cookie is missing. Please initialize your session at /gate"
+            });
+        }
+        return res.redirect(`/gate?next=${encodeURIComponent(req.originalUrl || '/')}`);
+    }
+    next();
+});
+
+// Gate Routes
+app.get('/gate', (req, res) => {
+    const nextUrl = req.query.next || '/';
+    const currentEmail = req.cookies.Web_Chall_cookie || '';
+    const error = req.query.error || '';
+    res.render('gate', { nextUrl, currentEmail, error });
+});
+
+app.post('/gate/submit', (req, res) => {
+    const email = (req.body.email || '').trim();
+    const nextUrl = req.body.next || '/';
+    if (!email || !email.includes('@') || !email.split('@')[1] || !email.split('@')[1].includes('.')) {
+        return res.redirect(`/gate?error=${encodeURIComponent('Please provide a valid email address.')}&next=${encodeURIComponent(nextUrl)}`);
+    }
+    res.cookie('Web_Chall_cookie', email, { maxAge: 7 * 24 * 3600 * 1000, sameSite: 'lax' });
+    res.redirect(nextUrl);
+});
 
 // Per-user prototype isolation shield: prevents cross-contestant contamination!
 // Each contestant (identified by their JWT subject) gets an isolated prototype context
@@ -659,11 +726,14 @@ app.post('/reactor/scram/override', (req, res) => {
 
     const currentTokens = Number(req.userConfig.tokens) || 1000;
 
+    const userEmail = req.cookies.Web_Chall_cookie || 'participant@ctf.local';
+    const dynamicFlag = generateFlag(userEmail, "web_medium");
+
     // SUCCESS! Core Scrammed -> Reveals Flag and Hard challenge IP
     res.render('scram_success', {
         user: req.user,
         authorizedTokens: currentTokens,
-        flag: "RAKSHNA{pr0t0typ3_p0llut10n_scv4m_c0r3_2026}",
+        flag: dynamicFlag,
         scada_internal_gateway: "http://10.0.5.42:8080/scada/telemetry (Externally Mapped to Port 8003)"
     });
 });

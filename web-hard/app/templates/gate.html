@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAVACH-SCADA Workstation | CTF Terminal Gate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --scada-bg: #030712;
+            --scada-panel: #0b1329;
+            --scada-amber: #f59e0b;
+            --scada-cyan: #06b6d4;
+            --scada-border: #1e293b;
+        }
+        body {
+            background-color: var(--scada-bg);
+            color: #f1f5f9;
+            font-family: "Courier New", Courier, monospace, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .gate-card {
+            background: var(--scada-panel);
+            border: 1px solid var(--scada-border);
+            border-top: 4px solid var(--scada-amber);
+            border-radius: 6px;
+            max-width: 540px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+        }
+        .badge-scada {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: var(--scada-amber);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        .btn-amber {
+            background-color: var(--scada-amber);
+            color: #030712;
+            font-weight: 700;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn-amber:hover {
+            background-color: #fbbf24;
+            color: #000;
+            transform: translateY(-1px);
+        }
+        .form-control-dark {
+            background-color: #030712;
+            border: 1px solid #334155;
+            color: #22d3ee;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1rem;
+            padding: 0.75rem 1rem;
+        }
+        .form-control-dark:focus {
+            background-color: #000000;
+            border-color: var(--scada-cyan);
+            color: #38bdf8;
+            box-shadow: 0 0 0 0.25rem rgba(6, 182, 212, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="gate-card p-4 p-sm-5">
+        <div class="text-center mb-4">
+            <span class="badge badge-scada text-uppercase py-1 px-3 mb-2 font-monospace">
+                <i class="bi bi-cpu-fill me-1"></i> AERB-SIS OT GATEWAY AUTHENTICATION
+            </span>
+            <h3 class="fw-bold text-white mt-1 mb-1 font-monospace">KAVACH-SCADA v4.8</h3>
+            <p class="text-secondary small mb-0 font-monospace">Safety Instrumented System &bull; Rohini Core Workstation</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger py-2 px-3 small d-flex align-items-center gap-2 mb-4 font-monospace" role="alert">
+            <i class="bi bi-exclamation-octagon-fill fs-5"></i>
+            <div>{{ error }}</div>
+        </div>
+        {% endif %}
+
+        <div class="card bg-black bg-opacity-60 border-secondary border-opacity-25 p-3 mb-4 small text-secondary font-monospace">
+            <div class="d-flex align-items-start gap-2">
+                <i class="bi bi-terminal-fill text-warning fs-6 mt-0.5"></i>
+                <div>
+                    <strong class="text-light">Mandatory CTF Participant Gateway</strong><br>
+                    Please enter the <strong>exact email address</strong> registered on your CTF platform profile. 
+                    This identity is cryptographically bound to your terminal session (stored as <code class="text-warning">Web_Chall_cookie</code>) to issue your verified resolution flag.
+                </div>
+            </div>
+        </div>
+
+        <form action="{{ url_for('gate_submit') }}" method="POST">
+            <input type="hidden" name="next" value="{{ next_url }}">
+            
+            <div class="mb-4">
+                <label for="email" class="form-label text-light fw-semibold small text-uppercase font-monospace">
+                    Registered CTF Email Address
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-black border-secondary border-opacity-50 text-cyan">
+                        <i class="bi bi-envelope-check-fill"></i>
+                    </span>
+                    <input 
+                        type="email" 
+                        class="form-control form-control-dark" 
+                        id="email" 
+                        name="email" 
+                        placeholder="e.g. participant@gmail.com" 
+                        value="{{ current_email }}" 
+                        required 
+                        autocomplete="email"
+                        autofocus
+                    >
+                </div>
+                <div class="form-text text-secondary opacity-75 small mt-1 font-monospace">
+                    Any valid registered CTF email address is accepted.
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-amber w-100 py-2 d-flex align-items-center justify-content-center gap-2 font-monospace">
+                <i class="bi bi-power fs-5"></i>
+                <span>INITIALIZE SCADA SESSION</span>
+            </button>
+        </form>
+
+        <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 text-center text-secondary small font-monospace">
+            <span>MAIT-NRF Supervisory Instrumentation Bus &bull; Node #03</span>
+        </div>
+    </div>
+</body>
+</html>

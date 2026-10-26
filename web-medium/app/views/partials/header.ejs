@@ -18,8 +18,19 @@
                 <i class="bi bi-shield-check text-warning"></i>
                 <span>AERB Statutory Public Radiological Transparency Network (PIRTN)</span>
             </span>
-            <span class="d-none d-md-inline text-light opacity-75">
-                Facility Node: <span class="font-monospace text-white">incident-portal.internal</span> | Sector 22 Rohini
+            <span class="d-none d-md-flex align-items-center gap-2">
+                <% if (typeof req !== 'undefined' && req.cookies && req.cookies.Web_Chall_cookie) { %>
+                    <span class="badge bg-info-subtle text-info border border-info font-monospace py-1 px-2">
+                        <i class="bi bi-person-check-fill me-1"></i>CTF: <%= req.cookies.Web_Chall_cookie %>
+                    </span>
+                    <a href="/gate" class="text-secondary small text-decoration-none" title="Change CTF Email"><i class="bi bi-pencil-square"></i></a>
+                <% } else { %>
+                    <a href="/gate" class="badge bg-danger text-white text-decoration-none py-1">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Web_Chall_cookie Missing
+                    </a>
+                <% } %>
+                <span class="text-secondary">|</span>
+                <span class="text-light opacity-75 font-monospace">incident-portal.internal</span>
             </span>
         </div>
     </div>
