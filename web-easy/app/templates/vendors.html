@@ -48,8 +48,7 @@
                         <th>Empanelled Scope & Category</th>
                         <th>Quality Standard</th>
                         <th>AERB Clearance Seal</th>
-                        <th>Validity</th>
-                        <th class="text-end">Status</th>
+                        <th class="text-end">Validity</th>
                     </tr>
                 </thead>
                 <tbody id="vendorsTbody">
@@ -63,10 +62,7 @@
                         <td><span class="badge bg-light text-dark border">{{ v.empanelment_category }}</span></td>
                         <td class="font-monospace small text-muted">{{ v.iso_cert }}</td>
                         <td class="font-monospace small fw-bold text-success">{{ v.aerb_clearance }}</td>
-                        <td class="font-monospace small text-muted">{{ v.valid_till }}</td>
-                        <td class="text-end">
-                            <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle-fill me-1"></i>Empanelled</span>
-                        </td>
+                        <td class="font-monospace small text-muted text-end">{{ v.valid_till }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
