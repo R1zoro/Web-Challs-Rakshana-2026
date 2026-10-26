@@ -50,7 +50,7 @@ def verify_and_read_vault(manifest_raw):
         print("[-] Error: Unauthorized recovery request. Expected 'auth': 'SIS_OVERRIDE'")
         return 1
 
-    # Security check: Strip directory traversal sequences
+    # Normalization: Strip relative path sequences
     sanitized_key = vault_key.lstrip("/")
     sanitized_key = sanitized_key.replace("../", "")
 

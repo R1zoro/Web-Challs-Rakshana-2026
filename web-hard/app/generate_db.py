@@ -249,17 +249,30 @@ def generate():
 
     for i in range(1, 81):
         wo_id = f"WO-2026-{5000 + i}"
-        title = random.choice(order_titles)
-        kks, _, _, _, _, _ = random.choice(kks_pool)
-        sec = random.choice(sectors)
-        prio = random.choice(["HIGH", "URGENT", "NORMAL", "CRITICAL"])
-        st = random.choice(wo_statuses)
-        auth = "Lead C&I Engineer (Dr. Arun Sharma)" if random.random() > 0.4 else "Shift Supervisor (K. Ramanathan)"
-        assigned = random.choice(technicians)
-        c_date = (datetime(2026, 10, 15) - timedelta(days=random.randint(1, 45))).strftime("%Y-%m-%d")
-        comp_date = (datetime(2026, 10, 20) - timedelta(days=random.randint(1, 10))).strftime("%Y-%m-%d") if st in ["COMPLETED", "CLOSED"] else None
-        v = random.choice(valves)
-        dose = round(random.uniform(0.12, 1.85), 2)
+        if i == 1:
+            title = "Secondary Decay Heat Relief Valve CV-201 Safety Interlock Diagnostics (SIS-Core bus 127.0.0.1:9090)"
+            kks = "20LCA10AA001"
+            sec = "Sector-B Aux Heat Exchanger Hall"
+            prio = "CRITICAL"
+            st = "LOTO_ACTIVE"
+            auth = "Lead C&I Engineer (Dr. Arun Sharma)"
+            assigned = "Tech K. Ramanathan (ID: C&I-402)"
+            c_date = "2026-10-24"
+            comp_date = None
+            v = "CV-201"
+            dose = 1.45
+        else:
+            title = random.choice(order_titles)
+            kks, _, _, _, _, _ = random.choice(kks_pool)
+            sec = random.choice(sectors)
+            prio = random.choice(["HIGH", "URGENT", "NORMAL", "CRITICAL"])
+            st = random.choice(wo_statuses)
+            auth = "Lead C&I Engineer (Dr. Arun Sharma)" if random.random() > 0.4 else "Shift Supervisor (K. Ramanathan)"
+            assigned = random.choice(technicians)
+            c_date = (datetime(2026, 10, 15) - timedelta(days=random.randint(1, 45))).strftime("%Y-%m-%d")
+            comp_date = (datetime(2026, 10, 20) - timedelta(days=random.randint(1, 10))).strftime("%Y-%m-%d") if st in ["COMPLETED", "CLOSED"] else None
+            v = random.choice(valves)
+            dose = round(random.uniform(0.12, 1.85), 2)
 
         cur.execute("""
         INSERT INTO maintenance_work_orders VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);

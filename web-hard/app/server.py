@@ -379,7 +379,7 @@ def api_work_order_detail(order_id):
 def diagnostic_probe():
     data = request.get_json(silent=True) or request.form
     target_url = (data.get('target_url') or '').strip()
-    timeout = int(data.get('timeout') or 5)
+    timeout = min(5, max(1, int(data.get('timeout') or 5)))
     method = (data.get('method') or 'GET').upper()
     payload = data.get('payload') or ''
 
@@ -397,8 +397,7 @@ def diagnostic_probe():
 
     host = (parsed.hostname or '').lower()
 
-    # Blacklist filter preventing obvious localhost/127.0.0.1
-    # Bypassed via: 127.0.0.2, decimal IP (2130706433), octal (0177.0.0.1), [::1], etc.
+    # Industrial OT loopback access control policy
     blocked_hosts = ["localhost", "127.0.0.1", "0.0.0.0", "::", "0"]
     if host in blocked_hosts or host.startswith("localhost"):
         return jsonify({
@@ -420,7 +419,7 @@ def diagnostic_probe():
                 body_bytes = str(payload).encode('utf-8')
 
         with urllib.request.urlopen(req, data=body_bytes, timeout=timeout) as response:
-            resp_body = response.read().decode('utf-8', errors='replace')
+            resp_body = response.read(65536).decode('utf-8', errors='replace')
             resp_code = response.getcode()
             headers = dict(response.headers)
 

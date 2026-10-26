@@ -14,6 +14,31 @@
         </span>
     </div>
 
+    <!-- Substation Bus Architecture Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="p-3 bg-dark rounded border border-secondary">
+                <span class="small text-muted d-block mb-1">Field Ethernet Subnet:</span>
+                <strong class="text-white font-monospace">10.0.5.0/24</strong>
+                <span class="badge bg-success-subtle text-success float-end">35 RTUs ONLINE</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 bg-dark rounded border border-secondary">
+                <span class="small text-muted d-block mb-1">SCADA Gateway Core:</span>
+                <strong class="text-cyan font-monospace">10.0.5.75:5000</strong>
+                <span class="badge bg-primary-subtle text-primary float-end">OPERATIONAL</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 bg-dark rounded border border-secondary">
+                <span class="small text-muted d-block mb-1">SIS-Core Air-Gapped Supervisory Bus:</span>
+                <strong class="text-warning font-monospace">127.0.0.1:9090</strong>
+                <span class="badge bg-danger-subtle text-danger float-end">ISOLATED (TRIP)</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Nodes Grid -->
     <div class="scada-card mb-4">
         <div class="table-responsive">

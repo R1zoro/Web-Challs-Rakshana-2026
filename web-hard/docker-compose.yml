@@ -26,6 +26,7 @@ services:
         limits:
           cpus: '0.75'
           memory: 256M
+          pids: 100
 
 networks:
   web_hard_internal:

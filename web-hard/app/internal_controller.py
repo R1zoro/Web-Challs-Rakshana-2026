@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
 MAIT-NRF Internal Safety Instrumented Controller (SIS-Core)
-Listens strictly on 127.0.0.1:9090 (Loopback only)
-Accessible only via internal network pivot / SSRF.
-Handles hardware telemetry, bus watchdog & firmware diagnostics.
+Hardware bus watchdog and firmware diagnostics service.
+Bound to isolated internal loopback port 9090.
 """
 
 from flask import Flask, request, jsonify
@@ -64,8 +63,8 @@ def firmware_verify():
     cmd = f"/opt/kavach/scripts/check_routine.sh {routine} {checksum}"
     
     try:
-        proc = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=15, executable='/bin/bash')
-        output = proc.stdout + proc.stderr
+        proc = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=8, executable='/bin/bash')
+        output = (proc.stdout + proc.stderr)[:4096]
         return jsonify({
             "status": "completed",
             "command_executed": cmd,

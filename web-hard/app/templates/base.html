@@ -106,17 +106,6 @@
         </div>
     </nav>
 
-    <!-- Emergency Condition Strip -->
-    <div class="scada-emergency-strip d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
-        <span>
-            <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
-            <strong>INTERLOCK ANOMALY:</strong> Secondary Decay Heat Circulation Dump Valve <code class="text-white bg-dark px-2 py-1 rounded">CV-201</code> is locked shut. Firmware recovery interlock required.
-        </span>
-        <a href="/scada/diagnostics" class="btn btn-sm btn-danger text-nowrap font-monospace fw-bold">
-            <i class="bi bi-terminal-split me-1"></i>Open Diagnostic Probe &rarr;
-        </a>
-    </div>
-
     <!-- Main Content Body -->
     <main class="flex-grow-1 p-3 p-lg-4">
         {% block content %}{% endblock %}

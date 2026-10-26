@@ -14,6 +14,15 @@
         </span>
     </div>
 
+    <!-- Incident Diagnostic Alert -->
+    <div class="alert alert-dark border-secondary small text-light d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <i class="bi bi-info-circle text-cyan me-2"></i>
+            <span class="text-light">Active C&amp;I Incident: Secondary relief valve <strong>CV-201</strong> is latched shut under safety trip <code>0x44</code>. Firmware parity check or supervisory probe required.</span>
+        </div>
+        <span class="badge bg-secondary font-monospace">INTERLOCK TRIP</span>
+    </div>
+
     <!-- Quick Target Node Selector Bar -->
     <div class="scada-card p-3 mb-4">
         <div class="d-flex flex-wrap align-items-center gap-2">
@@ -107,7 +116,7 @@
                                     </div>
                                     <div>
                                         <label class="form-label small text-light mb-1">Custom Payload Body (Optional)</label>
-                                        <textarea id="probePayload" class="form-control bg-dark border-secondary text-white font-monospace small" rows="2" placeholder='{"routine": "decay_heat_recovery", "checksum": "0x8FA4"}'></textarea>
+                                        <textarea id="probePayload" class="form-control bg-dark border-secondary text-white font-monospace small" rows="2" placeholder='{"node_id": "RTU-01", "register_offset": 40001, "count": 2}'></textarea>
                                     </div>
                                 </div>
                             </div>
