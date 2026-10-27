@@ -27,9 +27,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.75'
-          memory: 256M
-          pids: 100
+          cpus: '1.25'
+          memory: 768M
+          pids: 150
 
 networks:
   web_easy_internal:

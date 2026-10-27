@@ -14,6 +14,7 @@ services:
         limits:
           cpus: '0.50'
           memory: 128M
+          pids: 100
 
   web_medium_app:
     build: ./app
@@ -27,8 +28,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.75'
-          memory: 256M
+          cpus: '1.25'
+          memory: 896M
+          pids: 150
 
 networks:
   web_medium_internal:
