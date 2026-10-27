@@ -41,9 +41,9 @@ function makeParticipantWebFlag({ email, difficulty, originalFlag }) {
     return `RAKSHNA{${base.slice(8, -1)}_${suffix}}`;
 }
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Middleware (Strict size boundaries against payload flooding DoS)
+app.use(express.json({ limit: '64kb' }));
+app.use(express.urlencoded({ extended: false, limit: '64kb' }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/favicon.ico', (req, res) => res.status(204).end());
@@ -155,12 +155,13 @@ app.use((req, res, next) => {
     next();
 });
 
-// Deep recursive object merge utility for operator preferences
-function mergeConfig(target, source) {
+// Deep recursive object merge utility for operator preferences (Depth-capped against call-stack DoS)
+function mergeConfig(target, source, depth = 0) {
+    if (depth > 5) return target;
     for (let key in source) {
         if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
             if (!target[key]) target[key] = {};
-            mergeConfig(target[key], source[key]);
+            mergeConfig(target[key], source[key], depth + 1);
         } else {
             target[key] = source[key];
         }
