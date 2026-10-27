@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     async function fetchDocketDossier(ticketId) {
         if (!ticketId) return;
 
-        // Compute client-side integrity PoW
+        // Verification signature calculation
         var username = "contractor_testing";
         var ts = Math.floor(Date.now() / 1000);
         var nonce = 0;

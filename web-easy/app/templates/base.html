@@ -18,12 +18,12 @@
             <div class="d-none d-md-flex align-items-center gap-3">
                 {% if request.cookies.get('Web_Chall_cookie') %}
                     <span class="badge bg-warning-subtle text-warning border border-warning-subtle font-monospace">
-                        <i class="bi bi-person-check-fill me-1"></i>CTF: {{ request.cookies.get('Web_Chall_cookie') }}
+                        <i class="bi bi-person-check-fill me-1"></i>Session: {{ request.cookies.get('Web_Chall_cookie') }}
                     </span>
-                    <a href="{{ url_for('gate') }}" class="text-secondary small text-decoration-none" title="Change CTF Email"><i class="bi bi-pencil-square"></i></a>
+                    <a href="{{ url_for('gate') }}" class="text-secondary small text-decoration-none" title="Change Session Email"><i class="bi bi-pencil-square"></i></a>
                 {% else %}
                     <a href="{{ url_for('gate') }}" class="badge bg-danger text-white text-decoration-none py-1">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Web_Chall_cookie Missing
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Session Cookie Missing
                     </a>
                 {% endif %}
                 <span class="text-secondary">|</span>

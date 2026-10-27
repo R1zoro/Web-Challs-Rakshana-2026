@@ -14,6 +14,7 @@ services:
         limits:
           cpus: '0.50'
           memory: 128M
+          pids: 100
 
   web_easy_app:
     build: ./app
@@ -28,6 +29,7 @@ services:
         limits:
           cpus: '0.75'
           memory: 256M
+          pids: 100
 
 networks:
   web_easy_internal:

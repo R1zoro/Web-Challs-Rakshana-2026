@@ -128,7 +128,7 @@ CATALOG = [
     }
 ]
 
-# Central Logistics Discrepancy & Grievance Case Registry (Indexed 401..420)
+# Central logistics discrepancy records and quality assurance filings
 TICKETS = {
     401: {
         "id": 401,
@@ -452,7 +452,7 @@ def grievance():
     user_tickets = [t for k, t in TICKETS.items() if isinstance(k, int) and t.get('author_user') == session.get('user')]
     return render_template('grievance.html', user=session, tickets=user_tickets, notice=submission_notice)
 
-# Central Logistics Discrepancy Case Viewer API (Vulnerable to IDOR)
+# Central logistics discrepancy case viewer API endpoint
 @app.route('/api/grievance/view', methods=['GET'])
 def get_grievance():
     if 'user' not in session:
@@ -502,7 +502,7 @@ def get_grievance():
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Invalid docket identifier format. Numerical registry index required."}), 400
 
-    # Strict application-level range bounding to prevent automated scanning outside active docket index
+    # Validate docket archive range
     if num_id < 400 or num_id > 425:
         return jsonify({"status": "error", "message": "Dossier record out of active archive index range."}), 404
 
@@ -510,7 +510,7 @@ def get_grievance():
     if not ticket:
         return jsonify({"status": "error", "message": "Case docket not found in central registry."}), 404
 
-    # Dynamically inject personalized flag for ticket #414 based on Web_Chall_cookie
+    # Format memo disclosure details for active session
     response_ticket = dict(ticket)
     if num_id == 414:
         user_email = request.cookies.get('Web_Chall_cookie', '')
@@ -523,7 +523,7 @@ def get_grievance():
     })
 
 # =========================================================================
-# REALISTIC DECOY APIS (ENTERPRISE SUPPLY CHAIN HAYSTACK)
+# ENTERPRISE SUPPLY CHAIN LOGISTICS APIS
 # =========================================================================
 @app.route('/api/v1/tenders/<tender_no>', methods=['GET'])
 def api_tender_detail(tender_no):
