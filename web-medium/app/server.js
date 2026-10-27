@@ -101,8 +101,8 @@ app.post('/gate/submit', (req, res) => {
     res.redirect(nextUrl);
 });
 
-// Per-user prototype isolation shield: prevents cross-contestant contamination!
-// Each contestant (identified by their JWT subject) gets an isolated prototype context
+// Terminal session configuration store
+// Manages per-subject runtime preferences and interlock tickets
 const userSessionPrototypes = new Map();
 const activeArmTickets = new Map();
 
@@ -141,21 +141,21 @@ app.use((req, res, next) => {
     res.locals.user = req.user;
     res.locals.isPrivileged = req.user && PRIVILEGED_ROLES.includes(req.user.role);
 
-    // Isolate prototype per user ID (from JWT sub) or client IP
+    // Allocate isolated configuration scope for subject
     const userKey = (req.user && req.user.sub) || req.ip || 'anonymous';
     const sessionProto = getUserPrototype(userKey);
 
-    // Baseline tokens: privileged roles start with 15 tokens unless modified
+    // Statutory quota initialization for privileged operator sessions
     if (res.locals.isPrivileged && sessionProto.tokens === undefined) {
         sessionProto.tokens = 15;
     }
 
-    // Object inherits from the user's isolated session prototype
+    // Initialize operator configuration scope
     req.userConfig = Object.create(sessionProto);
     next();
 });
 
-// Operator configuration deep extension utility
+// Deep recursive object merge utility for operator preferences
 function mergeConfig(target, source) {
     for (let key in source) {
         if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
@@ -466,9 +466,11 @@ app.get('/api/v1/news/ticker', (req, res) => {
 });
 
 // =========================================================================
-// ANTI-AI "HAYSTACK" DECOY APIS (Rich contextual data to flood agent loops)
+// STATUTORY ENVIRONMENTAL & PERIMETER MONITORING APIS
+// Compliance: AERB Safety Directive 2026 / Radiation Protection Rules
 // =========================================================================
-
+// Real-time telemetry feed from Perimeter Ionizing Radiation Tracking Network (PIRTN)
+// Detectors: High-sensitivity LND-712 Geiger-Muller probes calibrated quarterly
 app.get('/api/v1/sensors/gamma', (req, res) => {
     res.json({
         facility: "MAIT Nuclear Research Facility (MAIT-NRF)",
@@ -485,6 +487,8 @@ app.get('/api/v1/sensors/gamma', (req, res) => {
     });
 });
 
+// Meteorological dispersion forecasting bridge (Pasquill-Gifford Gaussian Plume Algorithm)
+// Real-time boundary vector synchronization with National Emergency Response Centre (NERC)
 app.get('/api/v1/weather/met-station', (req, res) => {
     res.json({
         station_id: "MET-MAIT-ROHINI",
@@ -507,6 +511,8 @@ app.get('/api/v1/bulletins', (req, res) => {
     });
 });
 
+// Physical Security & Radiological Zoning Controller (SIL-2 Interface)
+// Dynamic clearance check against statutory IAEA Safeguards Categorization
 app.get('/api/v1/facility/zones', (req, res) => {
     res.json({
         zones: [
@@ -518,6 +524,8 @@ app.get('/api/v1/facility/zones', (req, res) => {
     });
 });
 
+// Civil Defense Offsite Evacuation Readiness Matrix (Zonal Sectors A-C)
+// Real-time synchronization with Delhi Disaster Management Authority (DDMA)
 app.get('/api/v1/evacuation/sectors', (req, res) => {
     res.json({
         evacuation_status: "STANDBY (Level 2 Alert)",
@@ -751,7 +759,7 @@ app.get('/dashboard', (req, res) => {
 });
 
 // =========================================================================
-// DECOY FACILITY MONITORING & DISPERSION APIS
+// C&I BUS TELEMETRY RELAYS & CONTAINMENT STATUS MONITORS
 // =========================================================================
 app.get('/api/telemetry/nodes', (req, res) => {
     res.json({
@@ -802,7 +810,7 @@ app.get('/reactor/scram/override', (req, res) => {
 
     const currentTokens = Number(req.userConfig.tokens);
 
-    // GATE CHECK: Requires 1,000 Safety Tokens!
+    // Safety interlock verification: Check minimum operator token balance
     if (!currentTokens || currentTokens < 1000) {
         return res.status(403).render('scram_locked', {
             user: req.user,
@@ -818,7 +826,7 @@ app.get('/reactor/scram/override', (req, res) => {
     });
 });
 
-// STEP 1 of SCRAM: Arm Pneumatic Interlock & Issue One-Time Arming Ticket
+// SCRAM Interlock Step 1: Arm pneumatic drive manifold & issue trip ticket
 app.post('/api/scram/arm', (req, res) => {
     if (!req.user || !res.locals.isPrivileged) {
         return res.status(403).json({ status: "error", message: "Commander clearance required." });
@@ -847,7 +855,7 @@ app.post('/api/scram/arm', (req, res) => {
     });
 });
 
-// STEP 2 of SCRAM: Submit Armed Trip Authorization & Execute Physical Scram
+// SCRAM Interlock Step 2: Validate trip authorization & execute physical insertion
 app.post('/reactor/scram/override', (req, res) => {
     if (!req.user || !res.locals.isPrivileged) {
         return res.status(403).render('error', {
@@ -881,7 +889,7 @@ app.post('/reactor/scram/override', (req, res) => {
         originalFlag: 'RAKSHNA{pr0t0typ3_p0llut10n_scv4m_c0r3}'
     });
 
-    // SUCCESS! Core Scrammed -> Reveals Flag and Hard challenge IP
+    // SCRAM sequence completed: Issue post-incident recovery dispatch
     res.render('scram_success', {
         user: req.user,
         authorizedTokens: currentTokens,
@@ -890,7 +898,7 @@ app.post('/reactor/scram/override', (req, res) => {
     });
 });
 
-// Operator Terminal Preferences Handler
+// Operator terminal configuration preferences handler
 app.post('/api/employee/preferences', (req, res) => {
     if (!req.user || !res.locals.isPrivileged) {
         return res.status(403).json({ status: "error", message: "Commander or Employee clearance required." });

@@ -21,12 +21,12 @@
             <span class="d-none d-md-flex align-items-center gap-2">
                 <% if (typeof req !== 'undefined' && req.cookies && req.cookies.Web_Chall_cookie) { %>
                     <span class="badge bg-info-subtle text-info border border-info font-monospace py-1 px-2">
-                        <i class="bi bi-person-check-fill me-1"></i>CTF: <%= req.cookies.Web_Chall_cookie %>
+                        <i class="bi bi-person-check-fill me-1"></i>Session: <%= req.cookies.Web_Chall_cookie %>
                     </span>
-                    <a href="/gate" class="text-secondary small text-decoration-none" title="Change CTF Email"><i class="bi bi-pencil-square"></i></a>
+                    <a href="/gate" class="text-secondary small text-decoration-none" title="Change Session Email"><i class="bi bi-pencil-square"></i></a>
                 <% } else { %>
                     <a href="/gate" class="badge bg-danger text-white text-decoration-none py-1">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Web_Chall_cookie Missing
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Session Cookie Missing
                     </a>
                 <% } %>
                 <span class="text-secondary">|</span>
