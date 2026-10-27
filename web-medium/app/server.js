@@ -899,6 +899,30 @@ app.post('/reactor/scram/override', (req, res) => {
     });
 });
 
+// Decoy C&I Interlock Calibration & Simulation Endpoints
+app.post('/api/v1/simulation/adjust', (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ status: "error", message: "Authentication required." });
+    }
+    const { flux_damping, boron_ppm, thermal_trim } = req.body || {};
+    return res.status(403).json({
+        status: "error",
+        code: "AERB-ACT-403",
+        message: "Secondary safety simulation bus is locked in READ_ONLY state under AERB Directive 2026/14. Manual actuation requires master engineering key."
+    });
+});
+
+app.post('/api/v1/sensors/recalibrate', (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ status: "error", message: "Authentication required." });
+    }
+    return res.status(409).json({
+        status: "error",
+        code: "AERB-CAL-409",
+        message: "Statutory sensor offset recalibration restricted during active thermal excursion alert."
+    });
+});
+
 // Operator terminal configuration preferences handler
 app.post('/api/employee/preferences', (req, res) => {
     if (!req.user || !res.locals.isPrivileged) {

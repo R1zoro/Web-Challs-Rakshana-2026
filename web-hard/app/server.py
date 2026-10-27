@@ -449,6 +449,9 @@ def api_work_order_detail(order_id):
 def diagnostic_probe():
     data = request.get_json(silent=True) or request.form
     target_url = (data.get('target_url') or '').strip()
+    if not target_url and data.get('target_node'):
+        target_url = 'http://' + str(data.get('target_node')).strip()
+    
     timeout = min(5, max(1, int(data.get('timeout') or 5)))
     method = (data.get('method') or 'GET').upper()
     payload = data.get('payload') or ''
@@ -468,8 +471,8 @@ def diagnostic_probe():
     host = (parsed.hostname or '').lower()
 
     # Industrial OT loopback access control policy
-    blocked_hosts = ["localhost", "127.0.0.1", "0.0.0.0", "::", "0"]
-    if host in blocked_hosts or host.startswith("localhost"):
+    blocked_hosts = ["localhost", "127.0.0.1", "0.0.0.0", "127.1", "::", "::1", "0"]
+    if host in blocked_hosts or host.startswith("localhost") or host == "127.1":
         return jsonify({
             "status": "security_violation",
             "code": "AERB-OT-SEC-901",

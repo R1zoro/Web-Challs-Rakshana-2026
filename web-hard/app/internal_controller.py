@@ -5,7 +5,7 @@ Hardware bus watchdog and firmware diagnostics service.
 Bound to isolated internal loopback port 9090.
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template_string
 import subprocess
 import os
 
@@ -16,25 +16,12 @@ PORT = 9090
 def index():
     return jsonify({
         "service": "MAIT-NRF Safety Instrumented System (SIS-Core)",
-        "version": "4.8.1-RT",
-        "node_id": "SIS-CORE- Rohini-01",
+        "node_id": "SIS-CORE-Rohini-01",
+        "hardware_model": "KAVACH-PLC-402-RT",
         "operating_mode": "POST_SCRAM_DECAY_HEAT_LOCKED",
-        "internal_endpoints": [
-            {
-                "path": "/api/controller/status",
-                "method": "GET",
-                "description": "Hardware watchdog, bus voltages & relay latch registers"
-            },
-            {
-                "path": "/api/controller/firmware-verify",
-                "method": "GET/POST",
-                "description": "Executes cryptographic parity check on controller firmware routine",
-                "parameters": {
-                    "routine": "Target routine identifier (e.g. decay_heat_recovery)",
-                    "checksum": "Expected 32-bit hex CRC (e.g. 0x8FA4)"
-                }
-            }
-        ]
+        "bus_voltage_vdc": 24.12,
+        "firmware_build": "v4.8.1-RT",
+        "watchdog_active": True
     })
 
 @app.route('/api/controller/status', methods=['GET'])
@@ -51,30 +38,43 @@ def status():
 
 @app.route('/api/controller/firmware-verify', methods=['GET', 'POST'])
 def firmware_verify():
-    # Accept from either JSON, query parameters, or form data
     data = {}
     if request.is_json:
         data = request.get_json() or {}
+    elif request.form:
+        data = request.form
     
-    routine = request.args.get('routine') or data.get('routine') or request.form.get('routine') or 'decay_heat_recovery'
-    checksum = request.args.get('checksum') or data.get('checksum') or request.form.get('checksum') or '0x8FA4'
+    routine = request.args.get('routine') or data.get('routine') or 'decay_heat_recovery'
+    checksum = request.args.get('checksum') or data.get('checksum') or '0x8FA4'
+    format_template = request.args.get('format') or data.get('format') or "[AUDIT] Routine {{ routine }} verification: {{ status }}"
 
-    # Routine validation invokes parity check shell script
-    cmd = f"/opt/kavach/scripts/check_routine.sh {routine} {checksum}"
-    
+    # 1. Parameterized, safe execution (Command Injection on routine is blocked!)
+    cmd = ["/opt/kavach/scripts/check_routine.sh", str(routine), str(checksum)]
     try:
-        proc = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=8, executable='/bin/bash')
-        output = (proc.stdout + proc.stderr)[:4096]
-        return jsonify({
-            "status": "completed",
-            "command_executed": cmd,
-            "returncode": proc.returncode,
-            "output": output
-        })
-    except subprocess.TimeoutExpired:
-        return jsonify({"status": "timeout", "error": "Diagnostic routine timed out."}), 504
+        proc = subprocess.run(cmd, shell=False, capture_output=True, text=True, timeout=8)
+        script_output = (proc.stdout + proc.stderr)[:2048]
     except Exception as e:
-        return jsonify({"status": "error", "error": str(e)}), 500
+        script_output = f"Routine execution error: {str(e)}"
+
+    # 2. Jinja2 template formatting for audit record (The SSTI entry point)
+    try:
+        rendered_audit = render_template_string(
+            format_template,
+            routine=routine,
+            checksum=checksum,
+            status="OK",
+            output=script_output
+        )
+    except Exception as te:
+        rendered_audit = f"Template rendering fault: {str(te)}"
+
+    return jsonify({
+        "status": "completed",
+        "target_routine": str(routine),
+        "parity_crc": str(checksum),
+        "audit_record": rendered_audit,
+        "controller_status": "LATCH_HELD"
+    })
 
 if __name__ == '__main__':
     # Loopback & internal network binding (Port 9090 is unexposed externally)

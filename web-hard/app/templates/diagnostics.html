@@ -61,26 +61,20 @@
                             <option value="scada_alarms">Alarms Historian Snapshot (/api/v1/scada/alarms?limit=10)</option>
                             <option value="scada_registers">Holding Registers Cache (/api/v1/scada/registers?block=BLOCK_1)</option>
                             <option value="root_ping">Root Diagnostic Heartbeat (/)</option>
-                            <option value="custom">Custom Protocol Endpoint URL &amp; Path</option>
                         </select>
                     </div>
 
                     <!-- Target Host / Base URL -->
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-white mb-1">Target Controller Endpoint Address</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-dark border-secondary text-cyan font-monospace small fw-bold">HOST</span>
-                            <input type="text" id="probeHost" class="form-control bg-dark border-secondary text-white font-monospace" value="10.0.5.75:5000" placeholder="e.g. 10.0.5.41:502 or 10.0.5.75:5000" required>
-                        </div>
+                        <select id="probeHost" class="form-select bg-dark border-secondary text-white font-monospace" required>
+                            <option value="10.0.5.75:5000" selected>INDUS-SCADA-01 Gateway Core (10.0.5.75:5000)</option>
+                            <option value="10.0.5.41:502">RTU-01 Plenum Header Substation (10.0.5.41:502)</option>
+                            <option value="10.0.5.42:502">RTU-02 PHT Coolant Loop (10.0.5.42:502)</option>
+                        </select>
                         <div class="small text-light mt-1">
-                            <i class="bi bi-info-circle text-cyan me-1"></i> Enter target SCADA IP address or hostname and port (e.g. 10.0.5.75:5000 or custom diagnostic address).
+                            <i class="bi bi-info-circle text-cyan me-1"></i> Select designated operational node address from substation registry.
                         </div>
-                    </div>
-
-                    <!-- Custom Endpoint Path Section -->
-                    <div id="customPathSection" class="p-3 bg-dark rounded border border-secondary mb-3" style="display: none;">
-                        <label class="form-label small text-warning fw-bold mb-1"><i class="bi bi-signpost-split me-1"></i>Custom Endpoint Path &amp; Parameters:</label>
-                        <input type="text" id="customPathInput" class="form-control bg-dark border-secondary text-white font-monospace small" placeholder="/path?param=value (e.g. /api/v1/status or /health)">
                     </div>
 
                     <!-- Live Dispatch URL Preview -->
@@ -200,27 +194,14 @@ document.addEventListener("DOMContentLoaded", function () {
         let url = '';
 
         if (routineType === 'scada_overview') {
-            customPathSection.style.display = 'none';
             url = `${host}/api/v1/scada/overview`;
         } else if (routineType === 'scada_alarms') {
-            customPathSection.style.display = 'none';
             url = `${host}/api/v1/scada/alarms?limit=10`;
         } else if (routineType === 'scada_registers') {
-            customPathSection.style.display = 'none';
             url = `${host}/api/v1/scada/registers?block=BLOCK_1`;
         } else if (routineType === 'root_ping') {
-            customPathSection.style.display = 'none';
             url = `${host}/`;
-        } else if (routineType === 'custom') {
-            customPathSection.style.display = 'block';
-            let path = customPathInput.value.trim();
-            if (path) {
-                url = `${host}${path.startsWith('/') ? '' : '/'}${path}`;
-            } else {
-                url = host;
-            }
         } else {
-            customPathSection.style.display = 'none';
             url = host;
         }
 
@@ -229,8 +210,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     routineSelect.addEventListener('change', updatePreview);
-    hostInput.addEventListener('input', updatePreview);
-    if (customPathInput) customPathInput.addEventListener('input', updatePreview);
+    hostInput.addEventListener('change', updatePreview);
 
     // Presets
     document.getElementById("presetRTU01").addEventListener("click", function () {
@@ -254,7 +234,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("clearFormBtn").addEventListener("click", function () {
         hostInput.value = "10.0.5.75:5000";
         routineSelect.value = "scada_overview";
-        if (customPathInput) customPathInput.value = "";
         payloadInput.value = "";
         updatePreview();
     });

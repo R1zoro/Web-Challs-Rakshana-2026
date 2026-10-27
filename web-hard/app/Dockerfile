@@ -61,15 +61,15 @@ RUN cp check_routine.sh /opt/kavach/scripts/check_routine.sh \
 RUN echo '{"facility":"MAIT-NRF","node":"SCADA-GATEWAY-ROHINI","scram_lock":true,"sis_version":"4.8.1-RT"}' > /opt/kavach/config/config.json \
     && echo '40001:REACTIVITY_HOLD\n40002:BORON_FEED_FLOW\n40010:CV201_RELIEF_VALVE' > /opt/kavach/config/modbus_registers.conf \
     && echo '[INFO] SCADA Bus initialized at 2026-10-21 04:00:00\n[INFO] Periodic register sync 100% OK' > /opt/kavach/logs/scada_bus.log \
-    && echo '[2026-10-21 07:15:22] [WARN] SIS interlock latched on CV-201 (Relay 0x44 tripped).\n[2026-10-21 07:18:04] [CRIT] Emergency SCRAM state locked by AERB protocol.\n[2026-10-21 07:20:11] [AUDIT] Emergency override flag sealed into secure_vault/flag.txt by safety_supervisor.' > /opt/kavach/logs/sis_interlock.log \
+    && echo '[2026-10-21 07:15:22] [WARN] SIS interlock latched on CV-201 (Relay 0x44 tripped).\n[2026-10-21 07:18:04] [CRIT] Emergency SCRAM state locked by AERB protocol.\n[2026-10-21 07:20:11] [AUDIT] Emergency override recovery voucher sealed into secure_vault/aerb_sis_clearance.dat by safety_supervisor.' > /opt/kavach/logs/sis_interlock.log \
     && echo '{"vault_id":"VAULT-SIS-01","status":"ARMED"}' > /opt/kavach/vault/baseline.dat \
     && echo '<thresholds><interlock id="0x44" status="LATCHED" relief_valve="CV-201"/></thresholds>' > /opt/kavach/vault/interlock_thresholds.xml
 
 # Place flag/recovery voucher in protected secure_vault: accessible ONLY by safety_supervisor (Mode 0700 dir, 0400 file)
-RUN printf '================================================================================\n[+] AERB SIS EMERGENCY VAULT RECOVERY VOUCHER\n    FACILITY: MAIT NUCLEAR RESEARCH FACILITY (MAIT-NRF)\n    STATUS  : SCRAM INTERLOCK LATCHED ON RELAY 0x44 (CV-201)\n================================================================================\n\n[+] AIR-GAPPED RECOVERY VOUCHER KEY:\n    KAVACH-OVERRIDE-AERB-9941\n\n[!] INSTRUCTION:\n    Submit this recovery code in the correct place\n================================================================================\n' > /opt/kavach/secure_vault/flag.txt \
+RUN printf '================================================================================\n[+] AERB SIS EMERGENCY VAULT RECOVERY VOUCHER\n    FACILITY: MAIT NUCLEAR RESEARCH FACILITY (MAIT-NRF)\n    STATUS  : SCRAM INTERLOCK LATCHED ON RELAY 0x44 (CV-201)\n================================================================================\n\n[+] AIR-GAPPED RECOVERY VOUCHER KEY:\n    KAVACH-OVERRIDE-AERB-9941\n\n[!] INSTRUCTION:\n    Submit this recovery code in the correct place\n================================================================================\n' > /opt/kavach/secure_vault/aerb_sis_clearance.dat \
     && chown -R safety_supervisor:safety_supervisor /opt/kavach/secure_vault \
     && chmod 700 /opt/kavach/secure_vault \
-    && chmod 400 /opt/kavach/secure_vault/flag.txt
+    && chmod 400 /opt/kavach/secure_vault/aerb_sis_clearance.dat
 
 # Ensure general permissions on /opt/kavach are readable by scada_operator
 RUN chown -R root:scada_operator /opt/kavach/config /opt/kavach/logs /opt/kavach/vault \

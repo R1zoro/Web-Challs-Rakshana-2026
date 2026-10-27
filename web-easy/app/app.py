@@ -452,47 +452,129 @@ def grievance():
     user_tickets = [t for k, t in TICKETS.items() if isinstance(k, int) and t.get('author_user') == session.get('user')]
     return render_template('grievance.html', user=session, tickets=user_tickets, notice=submission_notice)
 
+# =========================================================================
+# PROCUREMENT CASE & ORDER DOSSIER RETRIEVAL APIS (IDOR SURFACES)
+# =========================================================================
+
+# Honeypot IDOR Surface 1: Purchase Order Archives (IDs 101 - 130)
+DECOY_ORDERS = {
+    i: {
+        "order_id": i,
+        "po_number": f"PO-MAMCEL-2026-NUC-{i:03d}",
+        "item_name": [
+            "Inconel-625 High Pressure Steam Line Flange Assemblies",
+            "Heavy Water Primary Loop Gasket Kit (Class 1E Certified)",
+            "Borated Polyethylene Thermal Neutron Shielding Slaps",
+            "Zircaloy-4 Calandria Cladding Tubes (Grade A1)",
+            "Radiation Hardened Electronic Dosimeter Badges (Model NRF-40)",
+            "PHT Auxiliary Circulation Pump Mechanical Seal Spares",
+            "Reactor Vessel Seismic Restraint Strut Couplings",
+            "Secondary Coolant Chemistry Hydrazine Dosing Packages",
+            "Cadmium Absorber Control Rod Drive Mechanism Springs",
+            "AERB Statutory Radiation Perimeter Monitoring Sensors"
+        ][(i - 101) % 10],
+        "quantity": f"{(i * 12) % 150 + 10} Units",
+        "authorized_vendor": f"VND-MUM-{(i * 37) % 8000 + 1000}",
+        "total_amount_inr": f"₹{(i * 185000 + 450000):,}",
+        "status": "DISPATCHED" if i % 2 == 0 else "IN_TRANSIT",
+        "regulatory_clearance": f"AERB-MAT-{i}-2026",
+        "consignment_memo": "Material inspection report verified by DAE Quality Assurance Cell. All batch mill test certificates on record."
+    } for i in range(101, 131)
+}
+
+# Honeypot IDOR Surface 2: Vendor Audit & Empanelment Files (IDs 201 - 220)
+DECOY_VENDOR_AUDITS = {
+    i: {
+        "audit_id": i,
+        "vendor_code": f"VND-DEL-{i:04d}",
+        "vendor_name": [
+            "Adit Precision Nuclear Valves Ltd.",
+            "Larsen & Toubro Heavy Nuclear Fabrication Cell",
+            "Nuclear Fuel Complex Engineering Directorate",
+            "MIDHANI Special Superalloys Ltd.",
+            "Bharat Heavy Electricals Power Piping Division",
+            "Godrej & Boyce Aerospace & Defense Division",
+            "Walchandnagar Nuclear Pressure Components",
+            "Hindustan Aeronautics Metallurgy Section"
+        ][(i - 201) % 8],
+        "iso_accreditation": "ISO-19443:2018 (Nuclear Sector Supply Chain)",
+        "audit_score": f"{88 + (i % 10)}.5 / 100",
+        "audit_status": "COMPLIANT_CLASS_A" if i % 3 != 0 else "CONDITIONAL_APPROVAL",
+        "auditor_remarks": "Zero major non-conformances. Traceability of ASME Section III raw materials validated against master heat lot logs."
+    } for i in range(201, 221)
+}
+
+# Honeypot IDOR Surface 3: Statutory Circular Directives (IDs 301 - 315)
+DECOY_CIRCULARS = {
+    i: {
+        "circular_id": i,
+        "ref_code": f"DAE-AERB-CIRC-2026-{(i - 300):02d}",
+        "title": [
+            "Mandatory Ultrasonic Sub-Surface Examination on Primary Feed Pipes",
+            "Enhanced Fire Retardant Coating Standards for Containment Cabling",
+            "Seismic Re-qualification Criteria for Emergency Diesel Backup Vaults",
+            "Protocol for Rapid Nitrogen Purging of Fuel Handling Machines",
+            "Radioactive Waste Consignment Manifest Serialization Directive"
+        ][(i - 301) % 5],
+        "classification": "CONFIDENTIAL / AERB STATUTORY OT-II",
+        "compliance_deadline": "2026-11-30",
+        "authorizing_secretary": "Director, Directorate of Regulatory Inspection, AERB"
+    } for i in range(301, 316)
+}
+
+@app.route('/api/v1/orders/view', methods=['GET'])
+def get_order_detail():
+    if 'user' not in session:
+        return jsonify({"status": "error", "message": "Authentication session required."}), 401
+    
+    order_id = request.args.get('order_id') or request.args.get('id') or ''
+    try:
+        oid = int(order_id)
+    except (ValueError, TypeError):
+        return jsonify({"status": "error", "message": "Numerical order index required."}), 400
+
+    order = DECOY_ORDERS.get(oid)
+    if not order:
+        return jsonify({"status": "error", "message": "Purchase order reference not found in M-AMCEL procurement index."}), 404
+    return jsonify({"status": "success", "data": order})
+
+@app.route('/api/v1/vendors/audit', methods=['GET'])
+def get_vendor_audit():
+    if 'user' not in session:
+        return jsonify({"status": "error", "message": "Authentication session required."}), 401
+    
+    vid = request.args.get('vendor_id') or request.args.get('id') or ''
+    try:
+        v_idx = int(vid)
+    except (ValueError, TypeError):
+        return jsonify({"status": "error", "message": "Numerical vendor audit index required."}), 400
+
+    audit = DECOY_VENDOR_AUDITS.get(v_idx)
+    if not audit:
+        return jsonify({"status": "error", "message": "Vendor compliance audit file not found."}), 404
+    return jsonify({"status": "success", "data": audit})
+
+@app.route('/api/v1/circulars/read', methods=['GET'])
+def get_circular_read():
+    if 'user' not in session:
+        return jsonify({"status": "error", "message": "Authentication session required."}), 401
+    
+    cid = request.args.get('circ_id') or request.args.get('id') or ''
+    try:
+        c_idx = int(cid)
+    except (ValueError, TypeError):
+        return jsonify({"status": "error", "message": "Numerical circular index required."}), 400
+
+    circ = DECOY_CIRCULARS.get(c_idx)
+    if not circ:
+        return jsonify({"status": "error", "message": "Statutory circular reference not found."}), 404
+    return jsonify({"status": "success", "data": circ})
+
 # Central logistics discrepancy case viewer API endpoint
 @app.route('/api/grievance/view', methods=['GET'])
 def get_grievance():
     if 'user' not in session:
         return jsonify({"status": "error", "message": "Authentication session required."}), 401
-
-    client_ts = request.headers.get('X-Client-Timestamp')
-    client_nonce = request.headers.get('X-Client-Nonce')
-
-    if not client_ts or not client_nonce:
-        return jsonify({
-            "status": "error",
-            "message": "Client integrity check failed. Browser JavaScript runtime execution required."
-        }), 403
-
-    try:
-        ts = int(client_ts)
-        nonce = int(client_nonce)
-        now = int(time.time())
-
-        if abs(now - ts) > 120:
-            return jsonify({
-                "status": "error",
-                "message": "Client integrity token expired. Please reload the dossier."
-            }), 403
-
-        username = session.get('user', '')
-        seed = f"{username}:{ts}:{nonce}".encode('utf-8')
-        digest = hashlib.sha256(seed).hexdigest()
-
-        if not digest.startswith("0000"):
-            return jsonify({
-                "status": "error",
-                "message": "Cryptographic client proof invalid."
-            }), 403
-
-    except (ValueError, TypeError):
-        return jsonify({
-            "status": "error",
-            "message": "Malformed integrity payload format."
-        }), 400
 
     query_id = request.args.get('id') or request.args.get('docket') or request.args.get('case_id') or ''
     query_id = str(query_id).strip()
