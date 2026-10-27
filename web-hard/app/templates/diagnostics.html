@@ -18,9 +18,9 @@
     <div class="alert alert-dark border-secondary small text-light d-flex align-items-center justify-content-between mb-4">
         <div>
             <i class="bi bi-info-circle text-cyan me-2"></i>
-            <span class="text-light">Active C&amp;I Incident: Secondary relief valve <strong>CV-201</strong> is latched shut under safety trip <code>0x44</code>. Firmware parity check or supervisory probe required.</span>
+            <span class="text-light">Supervisory Diagnostic Console: Remote Field Bus &amp; Substation Telemetry Verification Interface. Transmit operational probes across network nodes to audit loop continuity and link status.</span>
         </div>
-        <span class="badge bg-secondary font-monospace">INTERLOCK TRIP</span>
+        <span class="badge bg-info-subtle text-info border border-info-subtle font-monospace">ONLINE</span>
     </div>
 
     <!-- Quick Target Node Selector Bar -->
@@ -80,7 +80,7 @@
                     <!-- Custom Endpoint Path Section -->
                     <div id="customPathSection" class="p-3 bg-dark rounded border border-secondary mb-3" style="display: none;">
                         <label class="form-label small text-warning fw-bold mb-1"><i class="bi bi-signpost-split me-1"></i>Custom Endpoint Path &amp; Parameters:</label>
-                        <input type="text" id="customPathInput" class="form-control bg-dark border-secondary text-white font-monospace small" placeholder="/path?param=value (e.g. /api/controller/...)">
+                        <input type="text" id="customPathInput" class="form-control bg-dark border-secondary text-white font-monospace small" placeholder="/path?param=value (e.g. /api/v1/status or /health)">
                     </div>
 
                     <!-- Live Dispatch URL Preview -->
